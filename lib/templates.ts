@@ -32,7 +32,7 @@ export function generateNextjsTemplate(state: AppState): Record<string, string> 
           ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
           <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />` : ''}
           <span style={{ fontSize: '32px', fontWeight: 600, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
-            ${state.brandName}
+            ${escapeStr(state.brandName)}
           </span>
         </div>
 
@@ -41,10 +41,10 @@ export function generateNextjsTemplate(state: AppState): Record<string, string> 
             ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${state.accentColor}30', color: '${state.accentColor}', fontSize: '20px', fontWeight: 600, letterSpacing: '-0.01em' }}>${tag}</div>`).join('\n            ')}
           </div>` : ''}
           <div style={{ fontSize: '80px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '24px', color: 'white', maxWidth: '1000px' }}>
-            ${state.title}
+            ${escapeStr(state.title)}
           </div>
           <div style={{ fontSize: '36px', fontWeight: 400, color: '#94a3b8', letterSpacing: '-0.01em', lineHeight: 1.4, maxWidth: '900px' }}>
-            ${state.description}
+            ${escapeStr(state.description)}
           </div>
         </div>
 
@@ -184,10 +184,10 @@ ${i18nTags}
     const userAgent = request.headers.get("User-Agent") || "";
 
     // Check if bot
-    if (userAgent.includes("Twitterbot") || userAgent.includes("facebookexternalhit")) {
+    if (userAgent.includes("Twitterbot") || userAgent.includes("facebookexternalhit") || userAgent.includes("WhatsApp")) {
       return new Response(
         \`<!DOCTYPE html><html><head>
-          <meta property="og:title" content="${escapeStr(state.title)}">
+          <meta property="og:title" content="${escapeHtmlAttr(state.title)}">
           <meta property="og:image" content="${hostedUrl}">
           <meta name="twitter:card" content="summary_large_image">
         </head><body></body></html>\`,
@@ -383,13 +383,13 @@ ${i18nTags}
   }
 }
 
-export function generateCode(state: AppState) {
+export function generateCode(state: AppState): TemplateFile[] {
   switch (state.framework) {
     case 'nextjs': return generateNextjsTemplate(state)
     case 'react': return generateReactSpaTemplate(state)
     case 'vue': return generateVueTemplate(state)
     case 'laravel': return generateLaravelTemplate(state)
     case 'html': return generateHtmlTemplate(state)
-    default: return ''
+    default: return []
   }
 }

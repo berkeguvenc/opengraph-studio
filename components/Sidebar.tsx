@@ -75,7 +75,7 @@ export function Sidebar() {
             <label className={labelClass}>{t('designPresets')}</label>
             <select
               value={store.preset}
-              onChange={(e) => store.setPreset(e.target.value as any)}
+              onChange={(e) => store.setPreset(e.target.value as "minimalist" | "saas" | "blog" | "ecommerce")}
               className={inputClass}
             >
               <option value="minimalist">{t('minimalist')}</option>
