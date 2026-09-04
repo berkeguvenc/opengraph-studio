@@ -1,14 +1,29 @@
 import { AppState } from './store'
 
-export function generateNextjsTemplate(state: AppState) {
+export interface TemplateFile {
+  tabName: string
+  filename: string
+  language: string
+  content: string
+}
+
+// Helper to escape single quotes in strings for JS/TS code generation
+function escapeStr(str: string) {
+  return str.replace(/'/g, "\\'")
+}
+
+// Helper to escape double quotes in strings for HTML/Blade generation
+function escapeHtmlAttr(str: string) {
+  return str.replace(/"/g, "&quot;")
+}
+
+export function generateNextjsTemplate(state: AppState): TemplateFile[] {
   const i18nCode = state.i18nEnabled
-    ? `
-// app/[locale]/opengraph-image.tsx
-import { ImageResponse } from 'next/og'
+    ? `import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
-export const alt = '${state.title}'
+export const alt = '${escapeStr(state.title)}'
 export const size = {
   width: 1200,
   height: 630,
@@ -22,13 +37,11 @@ export default async function Image({ params }: { params: { locale: string } }) 
 
   // ... rest is same as below
 `
-    : `
-// app/opengraph-image.tsx
-import { ImageResponse } from 'next/og'
+    : `import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
-export const alt = '${state.title}'
+export const alt = '${escapeStr(state.title)}'
 export const size = {
   width: 1200,
   height: 630,
@@ -40,52 +53,52 @@ export default async function Image() {
 `
 
   const metaCode = state.i18nEnabled
-    ? `
-// app/[locale]/layout.tsx
-import type { Metadata } from 'next'
+    ? `import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   return {
-    title: '${state.title}',
-    description: '${state.description}',
+    title: '${escapeStr(state.title)}',
+    description: '${escapeStr(state.description)}',
     openGraph: {
-      title: '${state.title}',
-      description: '${state.description}',
+      title: '${escapeStr(state.title)}',
+      description: '${escapeStr(state.description)}',
       url: 'https://yourdomain.com',
-      siteName: '${state.brandName}',
+      siteName: '${escapeStr(state.brandName)}',
       locale: params.locale,
-      alternateLocale: [${state.secondaryLocales.split(',').map(l => `'${l.trim()}'`).join(', ')}],
+      alternateLocale: [${state.secondaryLocales.split(',').map(l => `'${escapeStr(l.trim())}'`).join(', ')}],
       type: 'website',
+      images: ['https://yourdomain.com/api/og'],
     },
     twitter: {
       card: 'summary_large_image',
-      title: '${state.title}',
-      description: '${state.description}',
+      title: '${escapeStr(state.title)}',
+      description: '${escapeStr(state.description)}',
       creator: '@yourhandle',
+      images: ['https://yourdomain.com/api/og'],
     },
   }
 }
 `
-    : `
-// app/layout.tsx
-import type { Metadata } from 'next'
+    : `import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '${state.title}',
-  description: '${state.description}',
+  title: '${escapeStr(state.title)}',
+  description: '${escapeStr(state.description)}',
   openGraph: {
-    title: '${state.title}',
-    description: '${state.description}',
+    title: '${escapeStr(state.title)}',
+    description: '${escapeStr(state.description)}',
     url: 'https://yourdomain.com',
-    siteName: '${state.brandName}',
-    locale: '${state.defaultLocale}',
+    siteName: '${escapeStr(state.brandName)}',
+    locale: '${escapeStr(state.defaultLocale)}',
     type: 'website',
+    images: ['https://yourdomain.com/api/og'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '${state.title}',
-    description: '${state.description}',
+    title: '${escapeStr(state.title)}',
+    description: '${escapeStr(state.description)}',
     creator: '@yourhandle',
+    images: ['https://yourdomain.com/api/og'],
   },
 }
 `
@@ -116,19 +129,19 @@ export const metadata: Metadata = {
           ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
           <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />` : ''}
           <span style={{ fontSize: '32px', fontWeight: 600, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
-            ${state.brandName}
+            ${escapeStr(state.brandName)}
           </span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
           ${state.tags.length > 0 ? `<div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-            ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${state.accentColor}30', color: '${state.accentColor}', fontSize: '20px', fontWeight: 600, letterSpacing: '-0.01em' }}>${tag}</div>`).join('\\n            ')}
+            ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${state.accentColor}30', color: '${state.accentColor}', fontSize: '20px', fontWeight: 600, letterSpacing: '-0.01em' }}>${escapeStr(tag)}</div>`).join('\n            ')}
           </div>` : ''}
           <div style={{ fontSize: '80px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '24px', color: 'white', maxWidth: '1000px' }}>
-            ${state.title}
+            ${escapeStr(state.title)}
           </div>
           <div style={{ fontSize: '36px', fontWeight: 400, color: '#94a3b8', letterSpacing: '-0.01em', lineHeight: 1.4, maxWidth: '900px' }}>
-            ${state.description}
+            ${escapeStr(state.description)}
           </div>
         </div>
 
@@ -142,20 +155,23 @@ export const metadata: Metadata = {
 }
 `
 
-  return (i18nCode + componentCode + '\n' + metaCode).trim()
+  return [
+    {
+      tabName: 'opengraph-image.tsx',
+      filename: state.i18nEnabled ? 'app/[locale]/opengraph-image.tsx' : 'app/opengraph-image.tsx',
+      language: 'tsx',
+      content: (i18nCode + componentCode).trim()
+    },
+    {
+      tabName: 'generateMetadata',
+      filename: state.i18nEnabled ? 'app/[locale]/layout.tsx' : 'app/layout.tsx',
+      language: 'tsx',
+      content: metaCode.trim()
+    }
+  ]
 }
 
-// Helper to escape single quotes in strings for JS/TS code generation
-function escapeStr(str: string) {
-  return str.replace(/'/g, "\\'")
-}
-
-// Helper to escape double quotes in strings for HTML/Blade generation
-function escapeHtmlAttr(str: string) {
-  return str.replace(/"/g, "&quot;")
-}
-
-export function generateReactSpaTemplate(state: AppState) {
+export function generateReactSpaTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeHtmlAttr(state.title)
   const eDesc = escapeHtmlAttr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -180,8 +196,7 @@ export function generateReactSpaTemplate(state: AppState) {
 
   const hostedUrl = `https://yourdomain.com/api/og?${searchParams}`
 
-  return `<!-- public/index.html -->
-<head>
+  const htmlContent = `<head>
   <title>${eTitle}</title>
   <meta name="description" content="${eDesc}" />
 
@@ -198,20 +213,18 @@ ${i18nTags}
   <meta name="twitter:title" content="${eTitle}" />
   <meta name="twitter:description" content="${eDesc}" />
   <meta name="twitter:image" content="${hostedUrl}" />
-</head>
+</head>`
 
-<!-- Example Cloudflare Worker / Edge Middleware logic for dynamic bot responses -->
-<!--
-export default {
+  const workerContent = `export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const userAgent = request.headers.get("User-Agent") || "";
 
     // Check if bot
-    if (userAgent.includes("Twitterbot") || userAgent.includes("facebookexternalhit")) {
+    if (userAgent.includes("Twitterbot") || userAgent.includes("facebookexternalhit") || userAgent.includes("WhatsApp")) {
       return new Response(
         \`<!DOCTYPE html><html><head>
-          <meta property="og:title" content="${escapeStr(state.title)}">
+          <meta property="og:title" content="${escapeHtmlAttr(state.title)}">
           <meta property="og:image" content="${hostedUrl}">
           <meta name="twitter:card" content="summary_large_image">
         </head><body></body></html>\`,
@@ -221,11 +234,25 @@ export default {
 
     return fetch(request);
   }
-};
--->`
+};`
+
+  return [
+    {
+      tabName: 'index.html',
+      filename: 'public/index.html',
+      language: 'html',
+      content: htmlContent
+    },
+    {
+      tabName: 'worker.js',
+      filename: 'worker.js',
+      language: 'javascript',
+      content: workerContent
+    }
+  ]
 }
 
-export function generateVueTemplate(state: AppState) {
+export function generateVueTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
   const eDesc = escapeStr(state.description)
   const eBrand = escapeStr(state.brandName)
@@ -240,14 +267,13 @@ export function generateVueTemplate(state: AppState) {
     i18nConfig = `  ogLocale: '${state.defaultLocale}',`
   }
 
-  return `<!-- app.vue or any page component -->
-<script setup lang="ts">
+  const vueContent = `<script setup lang="ts">
 useSeoMeta({
   title: '${eTitle}',
   description: '${eDesc}',
   ogTitle: '${eTitle}',
   ogDescription: '${eDesc}',
-  ogImage: '/api/og', // Uses the generated Nuxt route below
+  ogImage: 'https://yourdomain.com/api/og', // Absolute URL required for social platforms
   ogSiteName: '${eBrand}',
   twitterCard: 'summary_large_image',
 ${i18nConfig}
@@ -259,21 +285,34 @@ ${i18nConfig}
 //   description: '${eDesc}',
 //   theme: '${state.accentColor}',
 // })
-</script>
+</script>`
 
-<!-- server/routes/og.ts -->
-<!--
-import { defineEventHandler } from 'h3'
+  const ogContent = `import { defineEventHandler } from 'h3'
 // Example implementation using Satori or resvg-js in Nuxt server routes
 // Requires appropriate packages installed in your Nuxt project
 
 export default defineEventHandler((event) => {
   // Render similar to Next.js ImageResponse using satori
-})
--->`
+  return { message: "Generated Image Here" }
+})`
+
+  return [
+    {
+      tabName: 'app.vue',
+      filename: 'app.vue',
+      language: 'vue',
+      content: vueContent
+    },
+    {
+      tabName: 'server/routes/og.ts',
+      filename: 'server/routes/og.ts',
+      language: 'typescript',
+      content: ogContent
+    }
+  ]
 }
 
-export function generateLaravelTemplate(state: AppState) {
+export function generateLaravelTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
   const eDesc = escapeStr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -289,8 +328,7 @@ export function generateLaravelTemplate(state: AppState) {
     i18nTags = `  <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />`
   }
 
-  return `{{-- resources/views/components/meta-tags.blade.php --}}
-@props([
+  const bladeContent = `@props([
   'title' => '${eTitle}',
   'description' => '${eDesc}',
   'image' => url('/api/og')
@@ -311,24 +349,46 @@ ${i18nTags}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="{{ $title }}" />
 <meta name="twitter:description" content="{{ $description }}" />
-<meta name="twitter:image" content="{{ $image }}" />
+<meta name="twitter:image" content="{{ $image }}" />`
 
+  const phpContent = `<?php
 
-{{-- routes/web.php --}}
-{{--
-use Illuminate\\Support\\Facades\\Route;
+namespace App\\Http\\Controllers;
 
-Route::get('/api/og', function () {
-    // Implement Spatie Browsershot or standard GD/Imagick generation here
-    // Example with Browsershot:
-    // return response(
-    //     \\Spatie\\Browsershot\\Browsershot::html('<h1>OG Image</h1>')->screenshot()
-    // )->header('Content-Type', 'image/png');
-});
---}}`
+use Illuminate\\Http\\Request;
+
+class OgImageController extends Controller
+{
+    public function generate(Request $request)
+    {
+        // Implement Spatie Browsershot or standard GD/Imagick generation here
+        // Example with Browsershot:
+        // return response(
+        //     \\Spatie\\Browsershot\\Browsershot::html('<h1>OG Image</h1>')->screenshot()
+        // )->header('Content-Type', 'image/png');
+    }
 }
 
-export function generateHtmlTemplate(state: AppState) {
+// routes/web.php
+// Route::get('/api/og', [OgImageController::class, 'generate']);`
+
+  return [
+    {
+      tabName: 'meta-tags.blade.php',
+      filename: 'resources/views/components/meta-tags.blade.php',
+      language: 'php',
+      content: bladeContent
+    },
+    {
+      tabName: 'Controller.php',
+      filename: 'app/Http/Controllers/OgImageController.php',
+      language: 'php',
+      content: phpContent
+    }
+  ]
+}
+
+export function generateHtmlTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeHtmlAttr(state.title)
   const eDesc = escapeHtmlAttr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -353,8 +413,7 @@ export function generateHtmlTemplate(state: AppState) {
 
   const hostedUrl = `https://yourdomain.com/api/og?${searchParams}`
 
-  return `<!-- Standard HTML Meta Tags -->
-<head>
+  const htmlContent = `<head>
   <!-- Primary Meta Tags -->
   <title>${eTitle}</title>
   <meta name="title" content="${eTitle}" />
@@ -376,15 +435,24 @@ ${i18nTags}
   <meta property="twitter:description" content="${eDesc}" />
   <meta property="twitter:image" content="${hostedUrl}" />
 </head>`
+
+  return [
+    {
+      tabName: 'index.html',
+      filename: 'index.html',
+      language: 'html',
+      content: htmlContent
+    }
+  ]
 }
 
-export function generateCode(state: AppState) {
+export function generateCode(state: AppState): TemplateFile[] {
   switch (state.framework) {
     case 'nextjs': return generateNextjsTemplate(state)
     case 'react': return generateReactSpaTemplate(state)
     case 'vue': return generateVueTemplate(state)
     case 'laravel': return generateLaravelTemplate(state)
     case 'html': return generateHtmlTemplate(state)
-    default: return ''
+    default: return []
   }
 }

@@ -11,6 +11,7 @@ const interBold = fetch(
   new URL('https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-ext-700-normal.ttf', import.meta.url)
 ).then((res) => res.arrayBuffer())
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generate(params: any) {
   const { title, description, accentColor, bgStyle, logoUrl, brandName, tags, preset, bgImageBase64 } = params
 
