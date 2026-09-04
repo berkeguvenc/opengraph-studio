@@ -4,9 +4,11 @@ import { useAppStore } from '../lib/store'
 import { generateCode } from '../lib/templates'
 import { useState, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
+import { useTranslation } from '../lib/i18n'
 
 export function CodeOutput() {
   const store = useAppStore()
+  const t = useTranslation(store.uiLanguage)
   const code = generateCode(store)
   const [html, setHtml] = useState('')
   const [copied, setCopied] = useState(false)
@@ -80,25 +82,25 @@ export function CodeOutput() {
   return (
     <div className="flex flex-col h-full bg-[#0d1117]">
       <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-[#0d1117]">
-        <div className="text-gray-300 font-medium text-sm">Generated Code</div>
+        <div className="text-gray-300 font-medium text-sm">{t('generatedCode')}</div>
         <div className="flex gap-2">
           <button
             onClick={copyUrl}
             className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
           >
-            {copiedUrl ? 'Copied URL!' : 'Copy Hosted URL'}
+            {copiedUrl ? t('copiedUrl') : t('copyHostedUrl')}
           </button>
           <button
             onClick={downloadFile}
             className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
           >
-            Download
+            {t('download')}
           </button>
           <button
             onClick={copyCode}
             className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
           >
-            {copied ? 'Copied!' : 'Copy Code'}
+            {copied ? t('copied') : t('copyCode')}
           </button>
         </div>
       </div>

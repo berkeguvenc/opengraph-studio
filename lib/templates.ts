@@ -328,12 +328,63 @@ Route::get('/api/og', function () {
 --}}`
 }
 
+export function generateHtmlTemplate(state: AppState) {
+  const eTitle = escapeHtmlAttr(state.title)
+  const eDesc = escapeHtmlAttr(state.description)
+  const eBrand = escapeHtmlAttr(state.brandName)
+
+  let i18nTags = ''
+  if (state.i18nEnabled) {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />\n` +
+      state.secondaryLocales.split(',').map(l => `  <meta property="og:locale:alternate" content="${l.trim()}" />`).join('\n')
+  } else {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />`
+  }
+
+  const searchParams = new URLSearchParams({
+    title: state.title,
+    description: state.description,
+    accentColor: state.accentColor,
+    bgStyle: state.bgStyle,
+    logoUrl: state.logoUrl,
+    brandName: state.brandName,
+    tags: state.tags.join(','),
+  }).toString()
+
+  const hostedUrl = `https://yourdomain.com/api/og?${searchParams}`
+
+  return `<!-- Standard HTML Meta Tags -->
+<head>
+  <!-- Primary Meta Tags -->
+  <title>${eTitle}</title>
+  <meta name="title" content="${eTitle}" />
+  <meta name="description" content="${eDesc}" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:title" content="${eTitle}" />
+  <meta property="og:description" content="${eDesc}" />
+  <meta property="og:image" content="${hostedUrl}" />
+  <meta property="og:site_name" content="${eBrand}" />
+${i18nTags}
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://yourdomain.com/" />
+  <meta property="twitter:title" content="${eTitle}" />
+  <meta property="twitter:description" content="${eDesc}" />
+  <meta property="twitter:image" content="${hostedUrl}" />
+</head>`
+}
+
 export function generateCode(state: AppState) {
   switch (state.framework) {
     case 'nextjs': return generateNextjsTemplate(state)
     case 'react': return generateReactSpaTemplate(state)
     case 'vue': return generateVueTemplate(state)
     case 'laravel': return generateLaravelTemplate(state)
+    case 'html': return generateHtmlTemplate(state)
     default: return ''
   }
 }
