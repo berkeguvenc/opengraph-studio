@@ -153,7 +153,7 @@ export function SocialPreview() {
                <div className="absolute right-0 top-0 w-0 h-0 border-t-8 border-t-[#056162] border-r-8 border-r-transparent -mr-2 mt-2"></div>
                <div className="bg-[#025151] rounded-md overflow-hidden mb-1">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                 <img src={imageUrl} alt="Preview" className="w-full aspect-square object-cover" />
+                 <img src={imageUrl} alt="Preview" className="w-full aspect-[1200/630] object-cover" />
                </div>
                <div className="px-2 pb-1 bg-[#025151] rounded-md">
                  <div className="text-[15px] font-semibold truncate leading-tight text-[#E9EDEF] pt-1">{store.title}</div>

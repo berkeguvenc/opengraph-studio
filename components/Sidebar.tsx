@@ -181,21 +181,6 @@ export function Sidebar() {
         <div className="space-y-4 pt-4 border-t border-slate-800">
           <h3 className="font-semibold text-slate-500 uppercase tracking-wider text-xs">{t('exportCode')}</h3>
 
-          <div>
-            <label className={labelClass}>{t('framework')}</label>
-            <select
-              value={store.framework}
-              onChange={(e) => store.setFramework(e.target.value as Framework)}
-              className={inputClass}
-            >
-              <option value="nextjs">Next.js (App Router)</option>
-              <option value="react">React SPA (Vite/CRA)</option>
-              <option value="vue">Vue 3 / Nuxt</option>
-              <option value="laravel">Laravel (Blade)</option>
-              <option value="html">Standard HTML</option>
-            </select>
-          </div>
-
           <div className="space-y-3">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
