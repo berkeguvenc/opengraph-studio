@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppStore, Framework, BgStyle } from '../lib/store'
+import { useAppStore, BgStyle } from '../lib/store'
 import { ChangeEvent, useState } from 'react'
 import { useTranslation } from '../lib/i18n'
 
@@ -75,7 +75,7 @@ export function Sidebar() {
             <label className={labelClass}>{t('designPresets')}</label>
             <select
               value={store.preset}
-              onChange={(e) => store.setPreset(e.target.value as any)}
+              onChange={(e) => store.setPreset(e.target.value as "minimalist" | "saas" | "blog" | "ecommerce")}
               className={inputClass}
             >
               <option value="minimalist">{t('minimalist')}</option>
