@@ -1,42 +1,92 @@
 'use client'
 
 import { useAppStore } from '../lib/store'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useTranslation } from '../lib/i18n'
 
 export function SocialPreview() {
   const store = useAppStore()
-  const [platform, setPlatform] = useState<'twitter' | 'linkedin' | 'facebook' | 'discord'>('twitter')
+  const t = useTranslation(store.uiLanguage)
+  const [platform, setPlatform] = useState<'twitter' | 'linkedin' | 'facebook' | 'discord' | 'whatsapp'>('twitter')
+  const [imageUrl, setImageUrl] = useState<string>('')
 
-  // Construct the URL for the iframe/image
-  const searchParams = new URLSearchParams({
-    title: store.title,
-    description: store.description,
-    accentColor: store.accentColor,
-    bgStyle: store.bgStyle,
-    logoUrl: store.logoUrl,
-    brandName: store.brandName,
-    tags: store.tags.join(','),
-  })
+  useEffect(() => {
+    const generateImage = async () => {
+      try {
+        const res = await fetch('/api/og', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: store.title,
+            description: store.description,
+            accentColor: store.accentColor,
+            bgStyle: store.bgStyle,
+            logoUrl: store.logoUrl,
+            brandName: store.brandName,
+            tags: store.tags,
+            preset: store.preset,
+            bgImageBase64: store.bgImageBase64
+          })
+        })
+        if (res.ok) {
+          const blob = await res.blob()
+          setImageUrl(URL.createObjectURL(blob))
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
 
-  // We use a local relative path for the API
-  const imageUrl = `/api/og?${searchParams.toString()}`
+    const timer = setTimeout(() => {
+      generateImage()
+    }, 250)
+
+    return () => clearTimeout(timer)
+  }, [
+    store.title,
+    store.description,
+    store.accentColor,
+    store.bgStyle,
+    store.logoUrl,
+    store.brandName,
+    store.tags,
+    store.preset,
+    store.bgImageBase64
+  ])
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
       <div className="flex items-center gap-2 p-4 border-b border-gray-200 bg-white">
-        {(['twitter', 'linkedin', 'facebook', 'discord'] as const).map(p => (
-          <button
-            key={p}
-            onClick={() => setPlatform(p)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              platform === p
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
-          </button>
-        ))}
+        <button
+          onClick={() => setPlatform('twitter')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'twitter' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('xPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('linkedin')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'linkedin' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('linkedinPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('facebook')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'facebook' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('facebookPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('discord')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'discord' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('discordPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('whatsapp')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'whatsapp' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('whatsappPreview')}
+        </button>
       </div>
 
       <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
@@ -95,6 +145,21 @@ export function SocialPreview() {
                   <img src={imageUrl} alt="Preview" className="w-full max-w-[400px] h-auto object-cover" />
                 </div>
               </div>
+            </div>
+          )}
+
+          {platform === 'whatsapp' && (
+            <div className="bg-[#056162] p-2 rounded-lg max-w-[320px] shadow-sm relative text-[#E9EDEF] mx-auto">
+               <div className="absolute right-0 top-0 w-0 h-0 border-t-8 border-t-[#056162] border-r-8 border-r-transparent -mr-2 mt-2"></div>
+               <div className="bg-[#025151] rounded-md overflow-hidden mb-1">
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                 <img src={imageUrl} alt="Preview" className="w-full aspect-square object-cover" />
+               </div>
+               <div className="px-2 pb-1 bg-[#025151] rounded-md">
+                 <div className="text-[15px] font-semibold truncate leading-tight text-[#E9EDEF] pt-1">{store.title}</div>
+                 <div className="text-[13px] text-[#8696A0] truncate leading-snug">{store.description}</div>
+                 <div className="text-[11px] text-[#8696A0] uppercase tracking-wider mt-1 pb-1">yourdomain.com</div>
+               </div>
             </div>
           )}
         </div>

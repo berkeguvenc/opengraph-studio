@@ -9,14 +9,19 @@ export const appStateSchema = z.object({
   logoUrl: z.string().url().or(z.literal('')),
   brandName: z.string().max(50),
   tags: z.array(z.string()).max(10),
-  framework: z.enum(['nextjs', 'react', 'vue', 'laravel']),
+  framework: z.enum(['nextjs', 'react', 'vue', 'laravel', 'html']),
   i18nEnabled: z.boolean(),
   defaultLocale: z.string().min(2),
-  secondaryLocales: z.string()
+  secondaryLocales: z.string(),
+  uiLanguage: z.enum(['en', 'tr']),
+  preset: z.enum(['minimalist', 'saas', 'blog', 'ecommerce']),
+  bgImageBase64: z.string()
 })
 
 export type Framework = z.infer<typeof appStateSchema>['framework']
 export type BgStyle = z.infer<typeof appStateSchema>['bgStyle']
+export type UiLanguage = z.infer<typeof appStateSchema>['uiLanguage']
+export type Preset = z.infer<typeof appStateSchema>['preset']
 
 export interface AppState {
   title: string
@@ -30,6 +35,9 @@ export interface AppState {
   i18nEnabled: boolean
   defaultLocale: string
   secondaryLocales: string
+  uiLanguage: UiLanguage
+  preset: Preset
+  bgImageBase64: string
 
   updateState: (updates: Partial<AppState>) => void
   setTitle: (title: string) => void
@@ -43,6 +51,9 @@ export interface AppState {
   setI18nEnabled: (i18nEnabled: boolean) => void
   setDefaultLocale: (defaultLocale: string) => void
   setSecondaryLocales: (secondaryLocales: string) => void
+  setUiLanguage: (uiLanguage: UiLanguage) => void
+  setPreset: (preset: Preset) => void
+  setBgImageBase64: (bgImageBase64: string) => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -57,6 +68,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   i18nEnabled: false,
   defaultLocale: 'en',
   secondaryLocales: 'es, fr',
+  uiLanguage: 'en',
+  preset: 'saas',
+  bgImageBase64: '',
 
   updateState: (updates) => {
     // Only update fields that pass validation
@@ -88,4 +102,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setI18nEnabled: (i18nEnabled) => get().updateState({ i18nEnabled }),
   setDefaultLocale: (defaultLocale) => get().updateState({ defaultLocale }),
   setSecondaryLocales: (secondaryLocales) => get().updateState({ secondaryLocales }),
+  setUiLanguage: (uiLanguage) => get().updateState({ uiLanguage }),
+  setPreset: (preset) => get().updateState({ preset }),
+  setBgImageBase64: (bgImageBase64) => get().updateState({ bgImageBase64 }),
 }))
