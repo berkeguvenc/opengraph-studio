@@ -1,0 +1,939 @@
+'use client'
+
+import { useAppStore } from '../lib/store'
+import { useState, useEffect } from 'react'
+import { useTranslation } from '../lib/i18n'
+
+export function SocialPreview() {
+  const store = useAppStore()
+  const t = useTranslation(store.uiLanguage)
+  const [platform, setPlatform] = useState<'twitter' | 'linkedin' | 'facebook' | 'discord' | 'whatsapp'>('twitter')
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    const generateImage = async () => {
+      try {
+        const res = await fetch('/api/og', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: store.title,
+            description: store.description,
+            accentColor: store.accentColor,
+            bgStyle: store.bgStyle,
+            logoUrl: store.logoUrl,
+            brandName: store.brandName,
+            tags: store.tags,
+            preset: store.preset,
+            bgImageBase64: store.bgImageBase64
+          })
+        })
+        if (res.ok && active) {
+          const blob = await res.blob()
+          setImageUrl(URL.createObjectURL(blob))
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    const timer = setTimeout(() => {
+      generateImage()
+    }, 250)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [
+    store.title,
+    store.description,
+    store.accentColor,
+    store.bgStyle,
+    store.logoUrl,
+    store.brandName,
+    store.tags,
+    store.preset,
+    store.bgImageBase64
+  ])
+
+  return (
+    <div className="flex flex-col h-full bg-gray-50/50">
+      <div className="flex items-center gap-2 p-4 border-b border-gray-200 bg-white">
+        <button
+          onClick={() => setPlatform('twitter')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'twitter' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('xPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('linkedin')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'linkedin' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('linkedinPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('facebook')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'facebook' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('facebookPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('discord')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'discord' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('discordPreview')}
+        </button>
+        <button
+          onClick={() => setPlatform('whatsapp')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${platform === 'whatsapp' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {t('whatsappPreview')}
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
+        <div className="w-full max-w-2xl">
+          {platform === 'twitter' && (
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div className="aspect-[1.91/1] w-full bg-gray-100 relative flex items-center justify-center">
+                {imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 animate-pulse" />
+                )}
+              </div>
+              <div className="p-3 bg-gray-50 border-t border-gray-200">
+                <div className="text-gray-500 text-sm truncate">yourdomain.com</div>
+                <div className="text-gray-900 font-bold truncate mt-0.5">{store.title}</div>
+                <div className="text-gray-500 text-sm truncate mt-0.5">{store.description}</div>
+              </div>
+            </div>
+          )}
+
+          {platform === 'linkedin' && (
+            <div className="border border-gray-200 bg-white shadow-sm" style={{ borderRadius: '2px' }}>
+              <div className="aspect-[1.91/1] w-full bg-gray-100 relative flex items-center justify-center">
+                {imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 animate-pulse" />
+                )}
+              </div>
+              <div className="p-4 bg-gray-50 border-t border-gray-200">
+                <div className="text-gray-900 font-semibold truncate text-base">{store.title}</div>
+                <div className="text-gray-500 text-xs truncate mt-1">yourdomain.com</div>
+              </div>
+            </div>
+          )}
+
+          {platform === 'facebook' && (
+            <div className="border border-gray-200 bg-white shadow-sm">
+              <div className="aspect-[1.91/1] w-full bg-gray-100 relative flex items-center justify-center">
+                {imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 animate-pulse" />
+                )}
+              </div>
+              <div className="p-3 bg-gray-50 border-t border-gray-200">
+                <div className="text-gray-500 text-[13px] uppercase tracking-wider truncate mb-1">YOURDOMAIN.COM</div>
+                <div className="text-gray-900 font-bold text-base truncate">{store.title}</div>
+                <div className="text-gray-500 text-sm truncate mt-1">{store.description}</div>
+              </div>
+            </div>
+          )}
+
+          {platform === 'discord' && (
+            <div className="bg-[#2f3136] rounded-md overflow-hidden max-w-[520px] shadow-sm flex flex-col border-l-4" style={{ borderColor: store.accentColor }}>
+              <div className="p-4 flex flex-col gap-2">
+                <div className="text-[#00aff4] text-sm hover:underline cursor-pointer truncate">yourdomain.com</div>
+                <div className="text-[#00aff4] font-semibold text-base hover:underline cursor-pointer truncate">{store.title}</div>
+                <div className="text-[#dcddde] text-sm line-clamp-3">{store.description}</div>
+              </div>
+              <div className="px-4 pb-4">
+                <div className="rounded-md overflow-hidden bg-black/20 w-fit">
+                  {imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={imageUrl} alt="Preview" className="w-full max-w-[400px] h-auto object-cover" />
+                  ) : (
+                    <div className="w-[360px] h-[189px] bg-white/5 animate-pulse" />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {platform === 'whatsapp' && (
+            <div className="bg-[#056162] p-2 rounded-lg max-w-[320px] shadow-sm relative text-[#E9EDEF] mx-auto">
+               <div className="absolute right-0 top-0 w-0 h-0 border-t-8 border-t-[#056162] border-r-8 border-r-transparent -mr-2 mt-2"></div>
+               <div className="bg-[#025151] rounded-md overflow-hidden mb-1 aspect-[1200/630] flex items-center justify-center">
+                 {imageUrl ? (
+                   /* eslint-disable-next-line @next/next/no-img-element */
+                   <img src={imageUrl} alt="Preview" className="w-full aspect-[1200/630] object-cover" />
+                 ) : (
+                   <div className="w-full h-full bg-black/20 animate-pulse" />
+                 )}
+               </div>
+               <div className="px-2 pb-1 bg-[#025151] rounded-md">
+                 <div className="text-[15px] font-semibold truncate leading-tight text-[#E9EDEF] pt-1">{store.title}</div>
+                 <div className="text-[13px] text-[#8696A0] truncate leading-snug">{store.description}</div>
+                 <div className="text-[11px] text-[#8696A0] uppercase tracking-wider mt-1 pb-1">yourdomain.com</div>
+               </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+'use client'
+
+import { useAppStore, Framework, BgStyle } from '../lib/store'
+import { ChangeEvent, useState } from 'react'
+import { useTranslation } from '../lib/i18n'
+
+export function Sidebar() {
+  const store = useAppStore()
+  const t = useTranslation(store.uiLanguage)
+
+  const [tagsInput, setTagsInput] = useState(store.tags.join(', '))
+  const [prevTags, setPrevTags] = useState(store.tags)
+
+  if (store.tags !== prevTags) {
+    setPrevTags(store.tags)
+    const currentInputArr = tagsInput.split(',').map(t => t.trim()).filter(Boolean)
+    if (JSON.stringify(currentInputArr) !== JSON.stringify(store.tags)) {
+      setTagsInput(store.tags.join(', '))
+    }
+  }
+
+  const handleTagsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTagsInput(e.target.value)
+    store.setTags(e.target.value.split(',').map(t => t.trim()).filter(Boolean))
+  }
+
+  const inputClass = "w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-slate-900 text-slate-100"
+  const labelClass = "block text-slate-400 mb-1"
+
+  return (
+    <div className="w-full h-full p-6 overflow-y-auto bg-slate-950 border-r border-slate-800 text-sm">
+      <h2 className="text-xl font-bold mb-6 text-slate-100">{t('settings')}</h2>
+
+      <div className="space-y-6">
+        {/* Basic Info */}
+        <div className="space-y-4">
+          <h3 className="font-semibold text-slate-500 uppercase tracking-wider text-xs">{t('metadata')}</h3>
+
+          <div>
+            <label className={labelClass}>{t('title')}</label>
+            <input
+              type="text"
+              value={store.title}
+              onChange={(e) => store.setTitle(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('description')}</label>
+            <textarea
+              value={store.description}
+              onChange={(e) => store.setDescription(e.target.value)}
+              rows={3}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('tags')}</label>
+            <input
+              type="text"
+              value={tagsInput}
+              onChange={handleTagsChange}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* Design Settings */}
+        <div className="space-y-4 pt-4 border-t border-slate-800">
+          <h3 className="font-semibold text-slate-500 uppercase tracking-wider text-xs">{t('design')}</h3>
+
+          <div>
+            <label className={labelClass}>{t('designPresets')}</label>
+            <select
+              value={store.preset}
+              onChange={(e) => store.setPreset(e.target.value as any)}
+              className={inputClass}
+            >
+              <option value="minimalist">{t('minimalist')}</option>
+              <option value="saas">{t('saas')}</option>
+              <option value="blog">{t('blog')}</option>
+              <option value="ecommerce">{t('ecommerce')}</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('brandName')}</label>
+            <input
+              type="text"
+              value={store.brandName}
+              onChange={(e) => store.setBrandName(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('logoUrl')}</label>
+            <input
+              type="text"
+              value={store.logoUrl}
+              onChange={(e) => store.setLogoUrl(e.target.value)}
+              className={inputClass}
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className={labelClass}>{t('logoUpload')}</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    store.setLogoUrl(event.target?.result as string)
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+              className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('accentColor')}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={store.accentColor}
+                onChange={(e) => store.setAccentColor(e.target.value)}
+                className="h-9 w-9 rounded cursor-pointer border-0 p-0 bg-transparent"
+              />
+              <input
+                type="text"
+                value={store.accentColor}
+                onChange={(e) => store.setAccentColor(e.target.value)}
+                className={`${inputClass} uppercase flex-1`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('bgStyle')}</label>
+            <select
+              value={store.bgStyle}
+              onChange={(e) => store.setBgStyle(e.target.value as BgStyle)}
+              className={inputClass}
+            >
+              <option value="solid">{t('solid')}</option>
+              <option value="gradient">{t('gradient')}</option>
+              <option value="pattern">{t('pattern')}</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('bgUpload')}</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    store.setBgImageBase64(event.target?.result as string)
+                  }
+                  reader.readAsDataURL(file)
+                } else {
+                  store.setBgImageBase64('')
+                }
+              }}
+              className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* Export Settings */}
+        <div className="space-y-4 pt-4 border-t border-slate-800">
+          <h3 className="font-semibold text-slate-500 uppercase tracking-wider text-xs">{t('exportCode')}</h3>
+
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.i18nEnabled}
+                onChange={(e) => store.setI18nEnabled(e.target.checked)}
+                className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span className="text-slate-300">{t('enableI18n')}</span>
+            </label>
+
+            {store.i18nEnabled && (
+              <div className="pl-6 space-y-3">
+                <div>
+                  <label className="block text-slate-500 text-xs mb-1">{t('defaultLocale')}</label>
+                  <input
+                    type="text"
+                    value={store.defaultLocale}
+                    onChange={(e) => store.setDefaultLocale(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-500 text-xs mb-1">{t('alternateLocales')}</label>
+                  <input
+                    type="text"
+                    value={store.secondaryLocales}
+                    onChange={(e) => store.setSecondaryLocales(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+'use client'
+
+import { useAppStore, Framework } from '../lib/store'
+import { generateCode } from '../lib/templates'
+import { useState, useEffect } from 'react'
+import { codeToHtml } from 'shiki'
+import { useTranslation } from '../lib/i18n'
+
+export function CodeOutput() {
+  const store = useAppStore()
+  const t = useTranslation(store.uiLanguage)
+  const code = generateCode(store)
+  const [html, setHtml] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [copiedUrl, setCopiedUrl] = useState(false)
+
+  useEffect(() => {
+    async function highlight() {
+      try {
+        const lang = store.framework === 'vue' ? 'vue'
+                   : store.framework === 'laravel' ? 'php'
+                   : store.framework === 'react' ? 'html'
+                   : 'tsx'
+
+        const result = await codeToHtml(code, {
+          lang,
+          theme: 'github-dark'
+        })
+        setHtml(result)
+      } catch (e) {
+        console.error('Failed to highlight code:', e)
+        // Fallback for simple display if highlighting fails
+        setHtml(`<pre style="background:#0d1117;color:#c9d1d9;padding:16px;"><code>${code}</code></pre>`)
+      }
+    }
+    highlight()
+  }, [code, store.framework])
+
+  const copyCode = async () => {
+    await navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const downloadFile = () => {
+    const ext = store.framework === 'vue' ? '.vue'
+              : store.framework === 'laravel' ? '.blade.php'
+              : store.framework === 'react' ? '.html'
+              : '.tsx'
+
+    const blob = new Blob([code], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `og-template${ext}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const copyUrl = async () => {
+    const searchParams = new URLSearchParams({
+      title: store.title,
+      description: store.description,
+      accentColor: store.accentColor,
+      bgStyle: store.bgStyle,
+      logoUrl: store.logoUrl,
+      brandName: store.brandName,
+      tags: store.tags.join(','),
+    }).toString()
+
+    // Create an absolute URL if running in browser
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://yourdomain.com'
+    const url = `${baseUrl}/api/og?${searchParams}`
+
+    await navigator.clipboard.writeText(url)
+    setCopiedUrl(true)
+    setTimeout(() => setCopiedUrl(false), 2000)
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-[#0d1117]">
+      <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-[#0d1117]">
+        <div className="flex gap-1 bg-gray-900 p-1 rounded-md">
+          {[
+            { id: 'nextjs', label: 'Next.js' },
+            { id: 'html', label: 'HTML' },
+            { id: 'vue', label: 'Nuxt 3' },
+            { id: 'react', label: 'React SPA' },
+            { id: 'laravel', label: 'Laravel' },
+          ].map((fw) => (
+            <button
+              key={fw.id}
+              onClick={() => store.setFramework(fw.id as Framework)}
+              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                store.framework === fw.id
+                  ? 'bg-gray-800 text-white'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              {fw.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={copyUrl}
+            className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+          >
+            {copiedUrl ? t('copiedUrl') : t('copyHostedUrl')}
+          </button>
+          <button
+            onClick={downloadFile}
+            className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+          >
+            {t('download')}
+          </button>
+          <button
+            onClick={copyCode}
+            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+          >
+            {copied ? t('copied') : t('copyCode')}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto text-sm p-4 relative">
+        <div dangerouslySetInnerHTML={{ __html: html }} className="[&>pre]:!bg-transparent [&>pre]:!p-0" />
+      </div>
+    </div>
+  )
+}
+import { AppState } from './store'
+
+export function generateNextjsTemplate(state: AppState) {
+  const i18nCode = state.i18nEnabled
+    ? `
+// app/[locale]/opengraph-image.tsx
+import { ImageResponse } from 'next/og'
+
+export const runtime = 'edge'
+
+export const alt = '${state.title}'
+export const size = {
+  width: 1200,
+  height: 630,
+}
+
+export const contentType = 'image/png'
+
+export default async function Image({ params }: { params: { locale: string } }) {
+  // You can use params.locale to load localized strings here
+  // const locale = params.locale
+
+  // ... rest is same as below
+`
+    : `
+// app/opengraph-image.tsx
+import { ImageResponse } from 'next/og'
+
+export const runtime = 'edge'
+
+export const alt = '${state.title}'
+export const size = {
+  width: 1200,
+  height: 630,
+}
+
+export const contentType = 'image/png'
+
+export default async function Image() {
+`
+
+  const metaCode = state.i18nEnabled
+    ? `
+// app/[locale]/layout.tsx
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  return {
+    title: '${state.title}',
+    description: '${state.description}',
+    openGraph: {
+      title: '${state.title}',
+      description: '${state.description}',
+      url: 'https://yourdomain.com',
+      siteName: '${state.brandName}',
+      locale: params.locale,
+      alternateLocale: [${state.secondaryLocales.split(',').map(l => `'${l.trim()}'`).join(', ')}],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: '${state.title}',
+      description: '${state.description}',
+      creator: '@yourhandle',
+    },
+  }
+}
+`
+    : `
+// app/layout.tsx
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '${state.title}',
+  description: '${state.description}',
+  openGraph: {
+    title: '${state.title}',
+    description: '${state.description}',
+    url: 'https://yourdomain.com',
+    siteName: '${state.brandName}',
+    locale: '${state.defaultLocale}',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '${state.title}',
+    description: '${state.description}',
+    creator: '@yourhandle',
+  },
+}
+`
+
+  let background = "'white'"
+  if (state.bgStyle === 'solid') background = "'#0f172a'"
+  else if (state.bgStyle === 'gradient') background = `'linear-gradient(to bottom right, #0f172a, ${state.accentColor}40, #0f172a)'`
+  else if (state.bgStyle === 'pattern') background = `'repeating-linear-gradient(45deg, #0f172a, #0f172a 10px, #1e293b 10px, #1e293b 20px)'`
+
+  const componentCode = `  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          backgroundImage: ${background.includes('gradient') ? background : 'undefined'},
+          backgroundColor: ${!background.includes('gradient') ? background : "'#0f172a'"},
+          padding: '80px',
+          color: 'white',
+          fontFamily: 'sans-serif',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 'auto' }}>
+          ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
+          <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />` : ''}
+          <span style={{ fontSize: '32px', fontWeight: 600, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
+            ${state.brandName}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
+          ${state.tags.length > 0 ? `<div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${state.accentColor}30', color: '${state.accentColor}', fontSize: '20px', fontWeight: 600, letterSpacing: '-0.01em' }}>${tag}</div>`).join('\\n            ')}
+          </div>` : ''}
+          <div style={{ fontSize: '80px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '24px', color: 'white', maxWidth: '1000px' }}>
+            ${state.title}
+          </div>
+          <div style={{ fontSize: '36px', fontWeight: 400, color: '#94a3b8', letterSpacing: '-0.01em', lineHeight: 1.4, maxWidth: '900px' }}>
+            ${state.description}
+          </div>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '16px', backgroundColor: '${state.accentColor}' }} />
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )
+}
+`
+
+  return (i18nCode + componentCode + '\n' + metaCode).trim()
+}
+
+// Helper to escape single quotes in strings for JS/TS code generation
+function escapeStr(str: string) {
+  return str.replace(/'/g, "\\'")
+}
+
+// Helper to escape double quotes in strings for HTML/Blade generation
+function escapeHtmlAttr(str: string) {
+  return str.replace(/"/g, "&quot;")
+}
+
+export function generateReactSpaTemplate(state: AppState) {
+  const eTitle = escapeHtmlAttr(state.title)
+  const eDesc = escapeHtmlAttr(state.description)
+  const eBrand = escapeHtmlAttr(state.brandName)
+
+  let i18nTags = ''
+  if (state.i18nEnabled) {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />\n` +
+      state.secondaryLocales.split(',').map(l => `  <meta property="og:locale:alternate" content="${l.trim()}" />`).join('\n')
+  } else {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />`
+  }
+
+  const searchParams = new URLSearchParams({
+    title: state.title,
+    description: state.description,
+    accentColor: state.accentColor,
+    bgStyle: state.bgStyle,
+    logoUrl: state.logoUrl,
+    brandName: state.brandName,
+    tags: state.tags.join(','),
+  }).toString()
+
+  const hostedUrl = `https://yourdomain.com/api/og?${searchParams}`
+
+  return `<!-- public/index.html -->
+<head>
+  <title>${eTitle}</title>
+  <meta name="description" content="${eDesc}" />
+
+  <!-- OpenGraph -->
+  <meta property="og:title" content="${eTitle}" />
+  <meta property="og:description" content="${eDesc}" />
+  <meta property="og:image" content="${hostedUrl}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="${eBrand}" />
+${i18nTags}
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${eTitle}" />
+  <meta name="twitter:description" content="${eDesc}" />
+  <meta name="twitter:image" content="${hostedUrl}" />
+</head>
+
+<!-- Example Cloudflare Worker / Edge Middleware logic for dynamic bot responses -->
+<!--
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const userAgent = request.headers.get("User-Agent") || "";
+
+    // Check if bot
+    if (userAgent.includes("Twitterbot") || userAgent.includes("facebookexternalhit")) {
+      return new Response(
+        \`<!DOCTYPE html><html><head>
+          <meta property="og:title" content="${escapeStr(state.title)}">
+          <meta property="og:image" content="${hostedUrl}">
+          <meta name="twitter:card" content="summary_large_image">
+        </head><body></body></html>\`,
+        { headers: { "content-type": "text/html" } }
+      );
+    }
+
+    return fetch(request);
+  }
+};
+-->`
+}
+
+export function generateVueTemplate(state: AppState) {
+  const eTitle = escapeStr(state.title)
+  const eDesc = escapeStr(state.description)
+  const eBrand = escapeStr(state.brandName)
+
+  let i18nConfig = ''
+  if (state.i18nEnabled) {
+    i18nConfig = `  // When using @nuxtjs/i18n, og:locale is typically handled automatically,
+  // but you can set defaults here or per-page:
+  ogLocale: '${state.defaultLocale}',
+  ogLocaleAlternate: [${state.secondaryLocales.split(',').map(l => `'${l.trim()}'`).join(', ')}],`
+  } else {
+    i18nConfig = `  ogLocale: '${state.defaultLocale}',`
+  }
+
+  return `<!-- app.vue or any page component -->
+<script setup lang="ts">
+useSeoMeta({
+  title: '${eTitle}',
+  description: '${eDesc}',
+  ogTitle: '${eTitle}',
+  ogDescription: '${eDesc}',
+  ogImage: '/api/og', // Uses the generated Nuxt route below
+  ogSiteName: '${eBrand}',
+  twitterCard: 'summary_large_image',
+${i18nConfig}
+})
+
+// If using nuxt-seo module / nuxt-og-image
+// defineOgImageComponent('NuxtSeo', {
+//   title: '${eTitle}',
+//   description: '${eDesc}',
+//   theme: '${state.accentColor}',
+// })
+</script>
+
+<!-- server/routes/og.ts -->
+<!--
+import { defineEventHandler } from 'h3'
+// Example implementation using Satori or resvg-js in Nuxt server routes
+// Requires appropriate packages installed in your Nuxt project
+
+export default defineEventHandler((event) => {
+  // Render similar to Next.js ImageResponse using satori
+})
+-->`
+}
+
+export function generateLaravelTemplate(state: AppState) {
+  const eTitle = escapeStr(state.title)
+  const eDesc = escapeStr(state.description)
+  const eBrand = escapeHtmlAttr(state.brandName)
+
+  let i18nTags = ''
+  if (state.i18nEnabled) {
+    i18nTags = `  <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />
+  {{-- Iterate over alternate locales --}}
+  @foreach(config('app.alternate_locales', []) as $locale)
+    <meta property="og:locale:alternate" content="{{ $locale }}" />
+  @endforeach`
+  } else {
+    i18nTags = `  <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />`
+  }
+
+  return `{{-- resources/views/components/meta-tags.blade.php --}}
+@props([
+  'title' => '${eTitle}',
+  'description' => '${eDesc}',
+  'image' => url('/api/og')
+])
+
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $description }}" />
+
+<!-- OpenGraph -->
+<meta property="og:title" content="{{ $title }}" />
+<meta property="og:description" content="{{ $description }}" />
+<meta property="og:image" content="{{ $image }}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="${eBrand}" />
+${i18nTags}
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ $title }}" />
+<meta name="twitter:description" content="{{ $description }}" />
+<meta name="twitter:image" content="{{ $image }}" />
+
+
+{{-- routes/web.php --}}
+{{--
+use Illuminate\\Support\\Facades\\Route;
+
+Route::get('/api/og', function () {
+    // Implement Spatie Browsershot or standard GD/Imagick generation here
+    // Example with Browsershot:
+    // return response(
+    //     \\Spatie\\Browsershot\\Browsershot::html('<h1>OG Image</h1>')->screenshot()
+    // )->header('Content-Type', 'image/png');
+});
+--}}`
+}
+
+export function generateHtmlTemplate(state: AppState) {
+  const eTitle = escapeHtmlAttr(state.title)
+  const eDesc = escapeHtmlAttr(state.description)
+  const eBrand = escapeHtmlAttr(state.brandName)
+
+  let i18nTags = ''
+  if (state.i18nEnabled) {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />\n` +
+      state.secondaryLocales.split(',').map(l => `  <meta property="og:locale:alternate" content="${l.trim()}" />`).join('\n')
+  } else {
+    i18nTags = `  <meta property="og:locale" content="${state.defaultLocale}" />`
+  }
+
+  const searchParams = new URLSearchParams({
+    title: state.title,
+    description: state.description,
+    accentColor: state.accentColor,
+    bgStyle: state.bgStyle,
+    logoUrl: state.logoUrl,
+    brandName: state.brandName,
+    tags: state.tags.join(','),
+  }).toString()
+
+  const hostedUrl = `https://yourdomain.com/api/og?${searchParams}`
+
+  return `<!-- Standard HTML Meta Tags -->
+<head>
+  <!-- Primary Meta Tags -->
+  <title>${eTitle}</title>
+  <meta name="title" content="${eTitle}" />
+  <meta name="description" content="${eDesc}" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:title" content="${eTitle}" />
+  <meta property="og:description" content="${eDesc}" />
+  <meta property="og:image" content="${hostedUrl}" />
+  <meta property="og:site_name" content="${eBrand}" />
+${i18nTags}
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://yourdomain.com/" />
+  <meta property="twitter:title" content="${eTitle}" />
+  <meta property="twitter:description" content="${eDesc}" />
+  <meta property="twitter:image" content="${hostedUrl}" />
+</head>`
+}
+
+export function generateCode(state: AppState) {
+  switch (state.framework) {
+    case 'nextjs': return generateNextjsTemplate(state)
+    case 'react': return generateReactSpaTemplate(state)
+    case 'vue': return generateVueTemplate(state)
+    case 'laravel': return generateLaravelTemplate(state)
+    case 'html': return generateHtmlTemplate(state)
+    default: return ''
+  }
+}
