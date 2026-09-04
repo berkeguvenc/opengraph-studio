@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppStore, Framework, BgStyle } from '../lib/store'
+import { useAppStore, BgStyle } from '../lib/store'
 import { ChangeEvent, useState } from 'react'
 import { useTranslation } from '../lib/i18n'
 

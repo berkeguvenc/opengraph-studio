@@ -170,20 +170,24 @@ export function SocialPreview() {
           )}
 
           {platform === 'whatsapp' && (
-            <div className="bg-[#056162] p-2 rounded-lg max-w-[320px] shadow-sm relative text-[#E9EDEF] mx-auto">
+            <div className="bg-[#056162] p-2 rounded-lg max-w-[400px] shadow-sm relative text-[#E9EDEF] mx-auto">
                <div className="absolute right-0 top-0 w-0 h-0 border-t-8 border-t-[#056162] border-r-8 border-r-transparent -mr-2 mt-2"></div>
-               <div className="bg-[#025151] rounded-md overflow-hidden mb-1 aspect-[1200/630] flex items-center justify-center">
-                 {imageUrl ? (
-                   /* eslint-disable-next-line @next/next/no-img-element */
-                   <img src={imageUrl} alt="Preview" className="w-full aspect-[1200/630] object-cover" />
-                 ) : (
-                   <div className="w-full h-full bg-black/20 animate-pulse" />
-                 )}
-               </div>
-               <div className="px-2 pb-1 bg-[#025151] rounded-md">
-                 <div className="text-[15px] font-semibold truncate leading-tight text-[#E9EDEF] pt-1">{store.title}</div>
-                 <div className="text-[13px] text-[#8696A0] truncate leading-snug">{store.description}</div>
-                 <div className="text-[11px] text-[#8696A0] uppercase tracking-wider mt-1 pb-1">yourdomain.com</div>
+
+               <div className="bg-[#025151] rounded-md overflow-hidden">
+                 <div className="aspect-[1200/630] w-full bg-gray-100 flex items-center justify-center">
+                   {imageUrl ? (
+                     /* eslint-disable-next-line @next/next/no-img-element */
+                     <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                   ) : (
+                     <div className="w-full h-full bg-black/20 animate-pulse" />
+                   )}
+                 </div>
+
+                 <div className="px-3 py-2 bg-[#025151]">
+                   <div className="text-[15px] font-semibold truncate leading-tight text-[#E9EDEF]">{store.title}</div>
+                   <div className="text-[13px] text-[#8696A0] truncate leading-snug mt-0.5">{store.description}</div>
+                   <div className="text-[11px] text-[#8696A0] uppercase tracking-wider mt-1.5">yourdomain.com</div>
+                 </div>
                </div>
             </div>
           )}
