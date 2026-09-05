@@ -142,7 +142,14 @@ export function CodeOutput() {
         setHtml(result)
       } catch (e) {
         console.error('Failed to highlight code:', e)
-        setHtml(`<pre style="background:#0d1117;color:#c9d1d9;padding:16px;"><code>${currentCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
+        const escapedCode = currentCode
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;')
+
+        setHtml(`<pre style="background:#0d1117;color:#c9d1d9;padding:16px;"><code>${escapedCode}</code></pre>`)
       }
     }
     highlight()
