@@ -1,7 +1,7 @@
 'use client'
 
 import { useAppStore } from '../lib/store'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from '../lib/i18n'
 
 export function SocialPreview() {
@@ -9,6 +9,7 @@ export function SocialPreview() {
   const t = useTranslation(store.uiLanguage)
   const [platform, setPlatform] = useState<'twitter' | 'linkedin' | 'facebook' | 'discord' | 'whatsapp'>('twitter')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const currentUrl = useRef<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -32,7 +33,13 @@ export function SocialPreview() {
         })
         if (res.ok && active) {
           const blob = await res.blob()
-          setImageUrl(URL.createObjectURL(blob))
+          const url = URL.createObjectURL(blob)
+
+          if (currentUrl.current) {
+            URL.revokeObjectURL(currentUrl.current)
+          }
+          currentUrl.current = url
+          setImageUrl(url)
         }
       } catch (e) {
         console.error(e)
@@ -58,6 +65,15 @@ export function SocialPreview() {
     store.preset,
     store.bgImageBase64
   ])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (currentUrl.current) {
+        URL.revokeObjectURL(currentUrl.current)
+      }
+    }
+  }, [])
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
