@@ -23,6 +23,19 @@ function isValidHttpUrl(string: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generate(params: any) {
+interface GenerateParams {
+  title: string
+  description: string
+  accentColor: string
+  bgStyle: string
+  logoUrl: string
+  brandName: string
+  tags: string[]
+  preset: string
+  bgImageBase64: string
+}
+
+async function generate(params: GenerateParams) {
   const { title, description, accentColor, bgStyle, logoUrl, brandName, tags, preset, bgImageBase64 } = params
 
   const interRegularData = await interRegular

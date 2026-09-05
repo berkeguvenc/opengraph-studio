@@ -5,28 +5,144 @@
 ▲ Next.js 16.3.4 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-✓ Ready in 560ms
-✓ Running next.config.ts took 43ms
+✓ Ready in 646ms
+✓ Running next.config.ts took 61ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
 
 ○ Compiling / ...
-An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- GET / 200 in 6.1s (next.js: 5.3s, application-code: 802ms)
-[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
+ GET / 200 in 8.6s (next.js: 7.9s, application-code: 674ms)
 ⚠ The Edge Runtime is deprecated. You can use the "nodejs" runtime instead. Learn more: https://nextjs.org/docs/messages/edge-runtime-deprecated
  POST /api/og 200 in 3.5s
-An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- GET / 200 in 67ms (next.js: 12ms, application-code: 56ms)
-[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- POST /api/og 200 in 655ms
-An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- GET / 200 in 61ms (next.js: 6ms, application-code: 55ms)
-[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- POST /api/og 200 in 727ms
-An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- GET / 200 in 60ms (next.js: 5ms, application-code: 55ms)
-[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- POST /api/og 200 in 649ms
-An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- GET / 200 in 64ms (next.js: 8ms, application-code: 56ms)
-[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
- POST /api/og 200 in 638ms
+ GET / 200 in 78ms (next.js: 15ms, application-code: 63ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="page.tsx">
+            <SegmentTrieNode>
+            <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+              <Home params={Promise} searchParams={Promise}>
+                <div className="flex h-scr...">
+                  <div className="w-[380px] ...">
+                    <Sidebar>
+                      <div className="w-full h-f...">
+                        <h2>
+                        <div className="space-y-6">
+                          <div className="space-y-4">
+                            <h3>
+                            <div>
+                              <label>
+                              <input
+                                type="text"
+                                value="OpenGraph Studio"
+                                onChange={function onChange}
+                                className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                            <div>
+                              <label>
+                              <textarea
+                                value="The ultimate tool for generating beautiful, framework-ready OpenGraph images an..."
+                                onChange={function onChange}
+                                rows={3}
+                                className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                            <div>
+                              <label>
+                              <input
+                                type="text"
+                                value="Next.js, React, SEO"
+                                onChange={function handleTagsChange}
+                                className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                          <div className="space-y-4 ...">
+                            <h3>
+                            <div>
+                            <div>
+                              <label>
+                              <input
+                                type="text"
+                                value="OG Studio"
+                                onChange={function onChange}
+                                className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                            <div>
+                              <label>
+                              <input
+                                type="text"
+                                value="https://vercel.com/api/www/avatar/a6r9L06J6QEqwJ351cItQ5O4?s=160"
+                                onChange={function onChange}
+                                className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outline..."
+                                placeholder="https://..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                            <div>
+                              <label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={function onChange}
+                                className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                            <div>
+                              <label>
+                              <div className="flex items...">
+                                <input
+                                  type="color"
+                                  value="#3b82f6"
+                                  onChange={function onChange}
+                                  className="h-9 w-9 rounded cursor-pointer border-0 p-0 bg-transparent"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                <input
+                                  type="text"
+                                  value="#3b82f6"
+                                  onChange={function onChange}
+                                  className="w-full px-3 py-2 border border-slate-700 rounded-md shadow-sm focus:outli..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                            <div>
+                            <div>
+                              <label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={function onChange}
+                                className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md..."
+-                               style={{caret-color:"transparent"}}
+                              >
+                          <div className="space-y-4 ...">
+                            <h3>
+                            <div className="space-y-3">
+                              <label className="flex items...">
+                                <input
+                                  type="checkbox"
+                                  checked={false}
+                                  onChange={function onChange}
+                                  className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 h..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                ...
+                  ...
+          ...
+        ...
