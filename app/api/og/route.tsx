@@ -11,6 +11,16 @@ const interBold = fetch(
   new URL('https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-ext-700-normal.ttf', import.meta.url)
 ).then((res) => res.arrayBuffer())
 
+function isValidHttpUrl(string: string) {
+  try {
+    const url = new URL(string)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    return false
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generate(params: any) {
   const { title, description, accentColor, bgStyle, logoUrl, brandName, tags, preset, bgImageBase64 } = params
@@ -40,6 +50,8 @@ async function generate(params: any) {
     backgroundColor = preset === 'minimalist' ? '#ffffff' : '#0f172a'
   }
 
+  const safeLogoUrl = logoUrl && isValidHttpUrl(logoUrl) ? logoUrl : ''
+
   let content = null
 
   const textColor = preset === 'minimalist' ? '#0f172a' : 'white'
@@ -50,7 +62,7 @@ async function generate(params: any) {
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '60px', backgroundColor, backgroundImage: background }}>
         <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '24px', flex: 1, flexDirection: 'column', padding: '60px', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'auto' }}>
-             {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '8px', marginRight: '16px' }} />}
+             {safeLogoUrl && <img src={safeLogoUrl} alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '8px', marginRight: '16px' }} />}
              <span style={{ fontSize: '24px', fontWeight: 700, color: '#334155' }}>{brandName}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -73,7 +85,7 @@ async function generate(params: any) {
           <div style={{ fontSize: '36px', color: descColor, lineHeight: 1.5, borderLeft: `6px solid ${accentColor}`, paddingLeft: '24px' }}>{description}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: 'auto', borderTop: `1px solid ${descColor}40`, paddingTop: '40px' }}>
-          {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '24px' }} />}
+          {safeLogoUrl && <img src={safeLogoUrl} alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '24px' }} />}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '28px', fontWeight: 700, color: textColor }}>{brandName}</span>
             <span style={{ fontSize: '24px', color: descColor }}>5 min read</span>
@@ -86,7 +98,7 @@ async function generate(params: any) {
       <div style={{ display: 'flex', height: '100%', width: '100%', backgroundColor, backgroundImage: background }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: '60%', padding: '80px', justifyContent: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
-             {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '56px', height: '56px', marginRight: '16px' }} />}
+             {safeLogoUrl && <img src={safeLogoUrl} alt="Logo" style={{ width: '56px', height: '56px', marginRight: '16px' }} />}
              <span style={{ fontSize: '32px', fontWeight: 700, color: textColor }}>{brandName}</span>
           </div>
           <div style={{ fontSize: '76px', fontWeight: 700, color: textColor, lineHeight: 1.1, marginBottom: '24px' }}>{title}</div>
@@ -109,7 +121,7 @@ async function generate(params: any) {
     content = (
       <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', backgroundImage: background, backgroundColor, padding: '80px' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 'auto' }}>
-          {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />}
+          {safeLogoUrl && <img src={safeLogoUrl} alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />}
           <span style={{ fontSize: '32px', fontWeight: 700, color: textColor, letterSpacing: '-0.02em' }}>{brandName}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
