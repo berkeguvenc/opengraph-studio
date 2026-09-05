@@ -19,12 +19,13 @@ async function generate(params: any) {
   const interBoldData = await interBold
 
   // Determine background
-  let background = 'white'
-  let backgroundColor = '#0f172a'
-  if (bgImageBase64) {
+  let background: string | undefined = undefined
+  let backgroundColor = preset === 'minimalist' ? '#ffffff' : '#0f172a'
+
+  if (bgImageBase64 && bgImageBase64.trim() !== '') {
     background = `url(${bgImageBase64})`
   } else if (bgStyle === 'solid') {
-    background = 'none' // solid color will be set by backgroundColor
+    background = undefined
     backgroundColor = preset === 'minimalist' ? '#ffffff' : '#0f172a'
   } else if (bgStyle === 'gradient') {
     background = preset === 'minimalist'
@@ -40,6 +41,8 @@ async function generate(params: any) {
     backgroundColor = preset === 'minimalist' ? '#ffffff' : '#0f172a'
   }
 
+  const bgStyleProps = background ? { backgroundImage: background } : {}
+
   let content = null
 
   const textColor = preset === 'minimalist' ? '#0f172a' : 'white'
@@ -47,7 +50,7 @@ async function generate(params: any) {
 
   if (preset === 'minimalist') {
     content = (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '60px', backgroundColor, backgroundImage: background }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '60px', backgroundColor, ...bgStyleProps }}>
         <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '24px', flex: 1, flexDirection: 'column', padding: '60px', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'auto' }}>
              {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '8px', marginRight: '16px' }} />}
@@ -62,7 +65,7 @@ async function generate(params: any) {
     )
   } else if (preset === 'blog') {
     content = (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '80px', backgroundColor, backgroundImage: background }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '80px', backgroundColor, ...bgStyleProps }}>
         <div style={{ display: 'flex', gap: '16px', marginBottom: '40px' }}>
           {tags.map((tag: string, i: number) => (
              <div key={i} style={{ display: 'flex', padding: '8px 24px', backgroundColor: accentColor, color: 'white', fontSize: '20px', fontWeight: 700, borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tag}</div>
@@ -83,7 +86,7 @@ async function generate(params: any) {
     )
   } else if (preset === 'ecommerce') {
     content = (
-      <div style={{ display: 'flex', height: '100%', width: '100%', backgroundColor, backgroundImage: background }}>
+      <div style={{ display: 'flex', height: '100%', width: '100%', backgroundColor, ...bgStyleProps }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: '60%', padding: '80px', justifyContent: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
              {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '56px', height: '56px', marginRight: '16px' }} />}
@@ -107,7 +110,7 @@ async function generate(params: any) {
   } else {
     // saas or fallback
     content = (
-      <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', backgroundImage: background, backgroundColor, padding: '80px' }}>
+      <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', backgroundColor, ...bgStyleProps, padding: '80px' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 'auto' }}>
           {logoUrl && <img src={logoUrl} alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />}
           <span style={{ fontSize: '32px', fontWeight: 700, color: textColor, letterSpacing: '-0.02em' }}>{brandName}</span>
