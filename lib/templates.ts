@@ -142,12 +142,12 @@ export const metadata: Metadata = {
   ]
 }
 // Helper to escape single quotes in strings for JS/TS code generation
-function escapeStr(str: string) {
+export function escapeStr(str: string) {
   return str.replace(/'/g, "\\'")
 }
 
 // Helper to escape double quotes in strings for HTML/Blade generation
-function escapeHtmlAttr(str: string) {
+export function escapeHtmlAttr(str: string) {
   return str.replace(/"/g, "&quot;")
 }
 
