@@ -5,7 +5,6 @@ import { generateCode, TemplateFile } from '../lib/templates'
 import { useState, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
 import { useTranslation } from '../lib/i18n'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 
 function EducationalGuide({ framework, activeFile }: { framework: Framework, activeFile: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +17,7 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
       content = (
         <div className="space-y-2">
           <p><strong>Placement:</strong> Place this file in your <code>app/</code> directory (or <code>app/[locale]/</code> for internationalization).</p>
-          <p><strong>Edge Runtime:</strong> This file uses <code>export const runtime = 'edge'</code>, ensuring lightweight and fast execution on Edge networks like Vercel or Cloudflare.</p>
+          <p><strong>Edge Runtime:</strong> This file uses <code>export const runtime = &apos;edge&apos;</code>, ensuring lightweight and fast execution on Edge networks like Vercel or Cloudflare.</p>
           <p><strong>Verification:</strong> Run your app locally and visit <code>http://localhost:3000/opengraph-image</code> to see the generated image.</p>
         </div>
       )
@@ -33,7 +32,7 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
   } else if (framework === 'html') {
     content = (
       <div className="space-y-2">
-        <p><strong>Instructions:</strong> Paste these tags directly into your HTML document's <code>&lt;head&gt;</code> section.</p>
+        <p><strong>Instructions:</strong> Paste these tags directly into your HTML document&apos;s <code>&lt;head&gt;</code> section.</p>
         <p><strong>Absolute URLs:</strong> The <code>og:image</code> URL must be an absolute path (e.g., <code>https://...</code>). Relative paths will not work on social networks.</p>
         <p><strong>Cache:</strong> If you change the image later, bots might cache the old one. Append a query parameter like <code>?v=2</code> to bust the cache.</p>
       </div>
@@ -49,7 +48,7 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Nitro Route:</strong> This is a boilerplate for an API route using Nuxt's Nitro engine.</p>
+          <p><strong>Nitro Route:</strong> This is a boilerplate for an API route using Nuxt&apos;s Nitro engine.</p>
           <p><strong>Configuration:</strong> Place this file in <code>server/routes/</code> to serve dynamic images via <code>/api/og</code>.</p>
         </div>
       )
@@ -58,14 +57,14 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
     if (activeFile === 'worker.js') {
       content = (
         <div className="space-y-2">
-          <p><strong>Edge Worker:</strong> Since CSR apps don't return HTML with meta tags immediately, use a Cloudflare Worker or Edge Middleware to intercept bots.</p>
+          <p><strong>Edge Worker:</strong> Since CSR apps don&apos;t return HTML with meta tags immediately, use a Cloudflare Worker or Edge Middleware to intercept bots.</p>
           <p><strong>Detection:</strong> The worker detects bot User-Agents (e.g., Twitterbot) and returns a lightweight HTML stub containing only the necessary meta tags.</p>
         </div>
       )
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Limitation:</strong> Client-side rendering (CSR) tools like React Helmet will <strong>not</strong> work for WhatsApp, X (Twitter), or Discord bots because these crawlers don't execute JavaScript.</p>
+          <p><strong>Limitation:</strong> Client-side rendering (CSR) tools like React Helmet will <strong>not</strong> work for WhatsApp, X (Twitter), or Discord bots because these crawlers don&apos;t execute JavaScript.</p>
           <p><strong>Solution:</strong> You must place these tags in your static <code>public/index.html</code> or serve them dynamically via an edge worker.</p>
         </div>
       )
@@ -74,7 +73,7 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
     if (activeFile.includes('meta-tags')) {
       content = (
         <div className="space-y-2">
-          <p><strong>Blade Component:</strong> Create this component and include it in your main layout, e.g., <code>&lt;x-meta-tags title="My Page" /&gt;</code> in <code>layouts/app.blade.php</code>.</p>
+          <p><strong>Blade Component:</strong> Create this component and include it in your main layout, e.g., <code>&lt;x-meta-tags title=&quot;My Page&quot; /&gt;</code> in <code>layouts/app.blade.php</code>.</p>
         </div>
       )
     } else {
@@ -109,22 +108,29 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
 export function CodeOutput() {
   const store = useAppStore()
   const t = useTranslation(store.uiLanguage)
-  const files = generateCode(store)
+  const files: TemplateFile[] = generateCode(store)
   const [activeFileIndex, setActiveFileIndex] = useState(0)
 
-  // Ensure active index is valid when framework changes
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setActiveFileIndex(0)
-  }, [store.framework, store.i18nEnabled])
+  // Reset active index when framework or i18n changes (standard React pattern without effect)
+  const [prevFramework, setPrevFramework] = useState(store.framework)
+  const [prevI18n, setPrevI18n] = useState(store.i18nEnabled)
 
-  const activeFileObj = files[activeFileIndex] || files[0]
-  const currentCode = activeFileObj ? activeFileObj.content : ''
+  if (store.framework !== prevFramework || store.i18nEnabled !== prevI18n) {
+    setPrevFramework(store.framework)
+    setPrevI18n(store.i18nEnabled)
+    setActiveFileIndex(0)
+  }
+
+  // Out-of-bounds protection ensuring the index is always valid
+  const safeIndex = activeFileIndex < files.length ? activeFileIndex : 0
+
+  // activeFile is defined strictly once with a single const in this scope
+  const activeFile: TemplateFile = files[safeIndex] || files[0]
+  const currentCode = activeFile.content
 
   const [html, setHtml] = useState('')
   const [copied, setCopied] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
-  const [guideOpen, setGuideOpen] = useState(false)
 
   useEffect(() => {
     async function highlight() {
@@ -133,7 +139,7 @@ export function CodeOutput() {
         return
       }
       try {
-        const lang = activeFileObj ? activeFileObj.language : 'tsx'
+        const lang = activeFile ? activeFile.language : 'tsx'
 
         const result = await codeToHtml(currentCode, {
           lang,
@@ -146,7 +152,7 @@ export function CodeOutput() {
       }
     }
     highlight()
-  }, [currentCode, activeFileObj])
+  }, [currentCode, activeFile])
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(currentCode)
@@ -160,7 +166,7 @@ export function CodeOutput() {
     const a = document.createElement('a')
     a.href = url
 
-    const fileName = activeFileObj ? activeFileObj.filename.split('/').pop() || 'og-template.txt' : 'og-template.txt'
+    const fileName = activeFile.filename.split('/').pop() || 'og-template.txt'
 
     a.download = fileName
     document.body.appendChild(a)
@@ -188,86 +194,9 @@ export function CodeOutput() {
     setTimeout(() => setCopiedUrl(false), 2000)
   }
 
-  const getGuideContent = () => {
-    if (!activeFileObj) return null;
-    const fw = store.framework;
-    const tabName = activeFileObj.tabName;
-
-    if (fw === 'nextjs') {
-      if (tabName === 'opengraph-image.tsx') {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Placement:</strong> Place this file in your <code>app/</code> directory (or <code>app/[locale]/</code> if using i18n).</p>
-            <p><strong>2. Edge Runtime:</strong> Next.js uses the Edge runtime for image generation, ensuring fast TTFB globally.</p>
-            <p><strong>3. Verification:</strong> Run <code>npm run dev</code> and visit <code>http://localhost:3000/opengraph-image</code> to preview the generated image.</p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Placement:</strong> Add this <code>generateMetadata</code> (or <code>metadata</code> object) to your <code>app/layout.tsx</code> or specific page.</p>
-            <p><strong>2. Absolute URLs:</strong> Make sure the <code>images</code> array points to an absolute URL for social crawlers to work properly.</p>
-          </div>
-        );
-      }
-    } else if (fw === 'html') {
-      return (
-        <div className="space-y-2 text-gray-300">
-          <p><strong>1. Placement:</strong> Paste these meta tags inside the <code>&lt;head&gt;</code> section of your HTML document.</p>
-          <p><strong>2. Absolute URLs:</strong> Ensure <code>og:image</code> and <code>twitter:image</code> use absolute URLs (e.g., <code>https://...</code>), as required by CDN crawlers.</p>
-          <p><strong>3. Cache Invalidation:</strong> If you change the image later, social platforms might cache the old one. You can append a query parameter like <code>?v=2</code> to force an update.</p>
-        </div>
-      );
-    } else if (fw === 'vue') {
-      if (tabName === 'app.vue') {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. <code>useSeoMeta</code>:</strong> This Nuxt 3 composable automatically injects meta tags into your document head.</p>
-            <p><strong>2. Module Alternative:</strong> Consider installing <code>nuxt-seo</code> or <code>nuxt-og-image</code> for built-in component-based generation.</p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Nitro Route:</strong> Place this in <code>server/routes/</code> to create an API endpoint.</p>
-            <p><strong>2. Implementation:</strong> You will need to install a library like <code>satori</code> or <code>resvg-js</code> to actually convert HTML/SVG to PNG in a Nuxt environment.</p>
-          </div>
-        );
-      }
-    } else if (fw === 'react') {
-      if (tabName === 'index.html') {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. CSR Limitation:</strong> Client-Side Rendering (e.g., React Helmet) does not work well for WhatsApp or Twitter bots, as they do not execute JavaScript.</p>
-            <p><strong>2. Solution:</strong> The static HTML must contain the meta tags, or you must use Server-Side Rendering (SSR) / Edge Middleware.</p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Edge Worker:</strong> Deploy this as a Cloudflare Worker or Vercel Edge Middleware.</p>
-            <p><strong>2. Bot Detection:</strong> It detects the <code>User-Agent</code> of social crawlers and serves them pre-rendered HTML containing your OG meta tags.</p>
-          </div>
-        );
-      }
-    } else if (fw === 'laravel') {
-      if (tabName === 'meta-tags.blade.php') {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Component:</strong> Include this Blade component in your main layout (e.g., <code>layouts/app.blade.php</code>).</p>
-            <p><strong>2. Usage:</strong> <code>&lt;x-meta-tags title=&quot;My Page&quot; description=&quot;Cool stuff&quot; /&gt;</code></p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="space-y-2 text-gray-300">
-            <p><strong>1. Controller:</strong> This handles the dynamic generation of the image.</p>
-            <p><strong>2. Packages:</strong> We recommend using <code>Spatie\Browsershot</code> (requires Puppeteer) or standard PHP GD/Imagick libraries to generate the PNG.</p>
-          </div>
-        );
-      }
-    }
-    return null;
+  const handleFrameworkChange = (fw: Framework) => {
+    setActiveFileIndex(0)
+    store.setFramework(fw)
   }
 
   return (
@@ -276,20 +205,19 @@ export function CodeOutput() {
         <div className="flex items-center justify-between">
           <div className="flex gap-1 bg-gray-900 p-1 rounded-md">
             {[
-              { id: 'nextjs', label: 'Next.js' },
               { id: 'html', label: 'HTML' },
-              { id: 'vue', label: 'Nuxt 3' },
               { id: 'react', label: 'React SPA' },
+              { id: 'nextjs', label: 'Next.js' },
+              { id: 'vue', label: 'Nuxt 3' },
               { id: 'laravel', label: 'Laravel' },
             ].map((fw) => (
               <button
                 key={fw.id}
-                onClick={() => store.setFramework(fw.id as Framework)}
-                className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                  store.framework === fw.id
+                onClick={() => handleFrameworkChange(fw.id as Framework)}
+                className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${store.framework === fw.id
                     ? 'bg-gray-800 text-white'
                     : 'text-gray-400 hover:text-gray-200'
-                }`}
+                  }`}
               >
                 {fw.label}
               </button>
@@ -323,11 +251,10 @@ export function CodeOutput() {
               <button
                 key={index}
                 onClick={() => setActiveFileIndex(index)}
-                className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
-                  activeFileIndex === index
+                className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${safeIndex === index
                     ? 'border-blue-500 text-blue-400'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
-                }`}
+                  }`}
               >
                 {file.tabName}
               </button>
@@ -341,7 +268,8 @@ export function CodeOutput() {
         <div dangerouslySetInnerHTML={{ __html: html }} className="[&>pre]:!bg-transparent [&>pre]:!p-0" />
       </div>
 
-      <EducationalGuide framework={store.framework} activeFile={activeFileObj ? activeFileObj.filename : ''} />
+      <EducationalGuide framework={store.framework} activeFile={activeFile.filename} />
     </div>
   )
 }
+

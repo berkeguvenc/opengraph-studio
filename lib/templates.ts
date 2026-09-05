@@ -1,4 +1,4 @@
-import { AppState } from './store'
+import { AppState, Framework } from './store'
 
 export interface TemplateFile {
   tabName: string;
@@ -435,13 +435,22 @@ ${i18nTags}
   ]
 }
 
-export function generateCode(state: AppState): TemplateFile[] {
-  switch (state.framework) {
-    case 'nextjs': return generateNextjsTemplate(state)
-    case 'react': return generateReactSpaTemplate(state)
-    case 'vue': return generateVueTemplate(state)
-    case 'laravel': return generateLaravelTemplate(state)
-    case 'html': return generateHtmlTemplate(state)
-    default: return []
-  }
+const templateGenerators: Record<Framework, (state: AppState) => TemplateFile[]> = {
+  nextjs: generateNextjsTemplate,
+  react: generateReactSpaTemplate,
+  vue: generateVueTemplate,
+  laravel: generateLaravelTemplate,
+  html: generateHtmlTemplate,
 }
+
+export function generateCode(state: AppState): TemplateFile[] {
+  const generator = templateGenerators[state.framework]
+  if (generator) {
+    const result = generator(state)
+    if (Array.isArray(result) && result.length > 0) {
+      return result
+    }
+  }
+  return generateHtmlTemplate(state)
+}
+
