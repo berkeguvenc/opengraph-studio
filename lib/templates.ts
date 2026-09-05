@@ -1,5 +1,6 @@
 import { AppState } from './store'
 
+// Interface representing a generated template file
 export interface TemplateFile {
   tabName: string;
   filename: string;
@@ -126,7 +127,7 @@ export const metadata: Metadata = {
   },
 }`
 
-  return [
+  const result: TemplateFile[] = [
     {
       tabName: isI18n ? '[locale]/opengraph-image.tsx' : 'opengraph-image.tsx',
       filename: ogFilename,
@@ -140,6 +141,7 @@ export const metadata: Metadata = {
       content: metaContent.trim()
     }
   ]
+  return result
 }
 // Helper to escape single quotes in strings for JS/TS code generation
 function escapeStr(str: string) {
@@ -216,7 +218,7 @@ ${i18nTags}
   }
 };`
 
-  return [
+  const result: TemplateFile[] = [
     {
       tabName: 'index.html',
       filename: 'public/index.html',
@@ -230,6 +232,7 @@ ${i18nTags}
       content: workerContent
     }
   ]
+  return result
 }
 export function generateVueTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
@@ -286,7 +289,7 @@ export default defineEventHandler((event) => {
   // Render similar to Next.js ImageResponse using satori
 })`
 
-  return [
+  const result: TemplateFile[] = [
     {
       tabName: 'app.vue',
       filename: 'app.vue',
@@ -300,6 +303,7 @@ export default defineEventHandler((event) => {
       content: nitroContent
     }
   ]
+  return result
 }
 export function generateLaravelTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
@@ -362,7 +366,7 @@ Route::get('/api/og', function () {
     // )->header('Content-Type', 'image/png');
 });`
 
-  return [
+  const result: TemplateFile[] = [
     {
       tabName: 'meta-tags.blade.php',
       filename: 'resources/views/components/meta-tags.blade.php',
@@ -376,6 +380,7 @@ Route::get('/api/og', function () {
       content: webContent
     }
   ]
+  return result
 }
 export function generateHtmlTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeHtmlAttr(state.title)
@@ -425,7 +430,7 @@ ${i18nTags}
   <meta property="twitter:image" content="${hostedUrl}" />
 </head>`
 
-  return [
+  const result: TemplateFile[] = [
     {
       tabName: 'index.html',
       filename: 'index.html',
@@ -433,6 +438,7 @@ ${i18nTags}
       content: htmlContent
     }
   ]
+  return result
 }
 
 export function generateCode(state: AppState): TemplateFile[] {
