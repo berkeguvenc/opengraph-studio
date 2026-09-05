@@ -4,52 +4,74 @@ import { useAppStore, Framework } from '../lib/store'
 import { generateCode, TemplateFile } from '../lib/templates'
 import { useState, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
-import { useTranslation } from '../lib/i18n'
+import { useTranslation, TranslationKey } from '../lib/i18n'
 
-function EducationalGuide({ framework, activeFile }: { framework: Framework, activeFile: string }) {
-  const [isOpen, setIsOpen] = useState(false);
+function formatGuideText(text: string) {
+  const parts = text.split(/(`[^`]+`)/g)
+  return parts.map((part, index) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code key={index} className="text-gray-200 bg-gray-800/80 px-1 py-0.5 rounded text-xs font-mono">
+          {part.slice(1, -1)}
+        </code>
+      )
+    }
+    return part
+  })
+}
 
-  const title = "How to Implement";
-  let content = null;
+function EducationalGuide({
+  framework,
+  activeFile,
+  t,
+}: {
+  framework: Framework
+  activeFile: string
+  t: (key: TranslationKey) => string
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const title = t('howToImplement')
+  let content = null
 
   if (framework === 'nextjs') {
     if (activeFile.includes('opengraph-image')) {
       content = (
         <div className="space-y-2">
-          <p><strong>Placement:</strong> Place this file in your <code>app/</code> directory (or <code>app/[locale]/</code> for internationalization).</p>
-          <p><strong>Edge Runtime:</strong> This file uses <code>export const runtime = &apos;edge&apos;</code>, ensuring lightweight and fast execution on Edge networks like Vercel or Cloudflare.</p>
-          <p><strong>Verification:</strong> Run your app locally and visit <code>http://localhost:3000/opengraph-image</code> to see the generated image.</p>
+          <p><strong>{t('guidePlacement')}:</strong> {formatGuideText(t('guideNextImagePlacement'))}</p>
+          <p><strong>{t('guideEdgeRuntime')}:</strong> {formatGuideText(t('guideNextImageEdge'))}</p>
+          <p><strong>{t('guideVerification')}:</strong> {formatGuideText(t('guideNextImageVerify'))}</p>
         </div>
       )
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Placement:</strong> Merge this code with your <code>app/layout.tsx</code> or page-level <code>page.tsx</code>.</p>
-          <p><strong>Verification:</strong> Check the resulting <code>&lt;head&gt;</code> tags using browser dev tools or social preview sites.</p>
+          <p><strong>{t('guidePlacement')}:</strong> {formatGuideText(t('guideNextLayoutPlacement'))}</p>
+          <p><strong>{t('guideVerification')}:</strong> {formatGuideText(t('guideNextLayoutVerify'))}</p>
         </div>
       )
     }
   } else if (framework === 'html') {
     content = (
       <div className="space-y-2">
-        <p><strong>Instructions:</strong> Paste these tags directly into your HTML document&apos;s <code>&lt;head&gt;</code> section.</p>
-        <p><strong>Absolute URLs:</strong> The <code>og:image</code> URL must be an absolute path (e.g., <code>https://...</code>). Relative paths will not work on social networks.</p>
-        <p><strong>Cache:</strong> If you change the image later, bots might cache the old one. Append a query parameter like <code>?v=2</code> to bust the cache.</p>
+        <p><strong>{t('guideInstructions')}:</strong> {formatGuideText(t('guideHtmlInstructions'))}</p>
+        <p><strong>{t('guideAbsoluteUrls')}:</strong> {formatGuideText(t('guideHtmlAbsoluteUrls'))}</p>
+        <p><strong>{t('guideCache')}:</strong> {formatGuideText(t('guideHtmlCache'))}</p>
       </div>
     )
   } else if (framework === 'vue') {
     if (activeFile === 'app.vue') {
       content = (
         <div className="space-y-2">
-          <p><strong>Usage:</strong> Place this <code>useSeoMeta</code> block in your <code>app.vue</code> or any page component.</p>
-          <p><strong>Nuxt OG Image:</strong> Alternatively, install <code>nuxt-og-image</code> to generate social cards automatically without needing manual API routes.</p>
+          <p><strong>{t('guideUsage')}:</strong> {formatGuideText(t('guideVueUsage'))}</p>
+          <p><strong>{t('guideNuxtOgImage')}:</strong> {formatGuideText(t('guideVueNuxtOg'))}</p>
         </div>
       )
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Nitro Route:</strong> This is a boilerplate for an API route using Nuxt&apos;s Nitro engine.</p>
-          <p><strong>Configuration:</strong> Place this file in <code>server/routes/</code> to serve dynamic images via <code>/api/og</code>.</p>
+          <p><strong>{t('guideNitroRoute')}:</strong> {formatGuideText(t('guideVueNitroRoute'))}</p>
+          <p><strong>{t('guideConfiguration')}:</strong> {formatGuideText(t('guideVueNitroConfig'))}</p>
         </div>
       )
     }
@@ -57,15 +79,15 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
     if (activeFile === 'worker.js') {
       content = (
         <div className="space-y-2">
-          <p><strong>Edge Worker:</strong> Since CSR apps don&apos;t return HTML with meta tags immediately, use a Cloudflare Worker or Edge Middleware to intercept bots.</p>
-          <p><strong>Detection:</strong> The worker detects bot User-Agents (e.g., Twitterbot) and returns a lightweight HTML stub containing only the necessary meta tags.</p>
+          <p><strong>{t('guideEdgeWorker')}:</strong> {formatGuideText(t('guideReactEdgeWorker'))}</p>
+          <p><strong>{t('guideDetection')}:</strong> {formatGuideText(t('guideReactDetection'))}</p>
         </div>
       )
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Limitation:</strong> Client-side rendering (CSR) tools like React Helmet will <strong>not</strong> work for WhatsApp, X (Twitter), or Discord bots because these crawlers don&apos;t execute JavaScript.</p>
-          <p><strong>Solution:</strong> You must place these tags in your static <code>public/index.html</code> or serve them dynamically via an edge worker.</p>
+          <p><strong>{t('guideLimitation')}:</strong> {formatGuideText(t('guideReactLimitation'))}</p>
+          <p><strong>{t('guideSolution')}:</strong> {formatGuideText(t('guideReactSolution'))}</p>
         </div>
       )
     }
@@ -73,19 +95,19 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
     if (activeFile.includes('meta-tags')) {
       content = (
         <div className="space-y-2">
-          <p><strong>Blade Component:</strong> Create this component and include it in your main layout, e.g., <code>&lt;x-meta-tags title=&quot;My Page&quot; /&gt;</code> in <code>layouts/app.blade.php</code>.</p>
+          <p><strong>{t('guideBladeComponent')}:</strong> {formatGuideText(t('guideLaravelBlade'))}</p>
         </div>
       )
     } else {
       content = (
         <div className="space-y-2">
-          <p><strong>Dynamic Generation:</strong> You can generate OG images dynamically using Spatie Browsershot or standard GD/Imagick libraries.</p>
+          <p><strong>{t('guideDynamicGeneration')}:</strong> {formatGuideText(t('guideLaravelDynamic'))}</p>
         </div>
       )
     }
   }
 
-  if (!content) return null;
+  if (!content) return null
 
   return (
     <div className="border-t border-gray-800 bg-[#0a0d14]">
@@ -268,7 +290,7 @@ export function CodeOutput() {
         <div dangerouslySetInnerHTML={{ __html: html }} className="[&>pre]:!bg-transparent [&>pre]:!p-0" />
       </div>
 
-      <EducationalGuide framework={store.framework} activeFile={activeFile.filename} />
+      <EducationalGuide framework={store.framework} activeFile={activeFile.filename} t={t} />
     </div>
   )
 }
