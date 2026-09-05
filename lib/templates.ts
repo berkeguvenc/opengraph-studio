@@ -1,6 +1,13 @@
 import { AppState } from './store'
 
-export function generateNextjsTemplate(state: AppState): Record<string, string> {
+export interface TemplateFile {
+  tabName: string;
+  filename: string;
+  language: string;
+  content: string;
+}
+
+export function generateNextjsTemplate(state: AppState): TemplateFile[] {
   const isI18n = state.i18nEnabled
 
   const ogFilename = isI18n ? 'app/[locale]/opengraph-image.tsx' : 'app/opengraph-image.tsx'
@@ -119,10 +126,20 @@ export const metadata: Metadata = {
   },
 }`
 
-  return {
-    [ogFilename]: ogContent.trim(),
-    [layoutFilename]: metaContent.trim()
-  }
+  return [
+    {
+      tabName: isI18n ? '[locale]/opengraph-image.tsx' : 'opengraph-image.tsx',
+      filename: ogFilename,
+      language: 'tsx',
+      content: ogContent.trim()
+    },
+    {
+      tabName: isI18n ? '[locale]/layout.tsx' : 'layout.tsx',
+      filename: layoutFilename,
+      language: 'tsx',
+      content: metaContent.trim()
+    }
+  ]
 }
 // Helper to escape single quotes in strings for JS/TS code generation
 function escapeStr(str: string) {
@@ -134,7 +151,7 @@ function escapeHtmlAttr(str: string) {
   return str.replace(/"/g, "&quot;")
 }
 
-export function generateReactSpaTemplate(state: AppState): Record<string, string> {
+export function generateReactSpaTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeHtmlAttr(state.title)
   const eDesc = escapeHtmlAttr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -199,12 +216,22 @@ ${i18nTags}
   }
 };`
 
-  return {
-    'public/index.html': htmlContent,
-    'worker.js': workerContent
-  }
+  return [
+    {
+      tabName: 'index.html',
+      filename: 'public/index.html',
+      language: 'html',
+      content: htmlContent
+    },
+    {
+      tabName: 'worker.js',
+      filename: 'worker.js',
+      language: 'javascript',
+      content: workerContent
+    }
+  ]
 }
-export function generateVueTemplate(state: AppState): Record<string, string> {
+export function generateVueTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
   const eDesc = escapeStr(state.description)
   const eBrand = escapeStr(state.brandName)
@@ -259,12 +286,22 @@ export default defineEventHandler((event) => {
   // Render similar to Next.js ImageResponse using satori
 })`
 
-  return {
-    'app.vue': vueContent,
-    'server/routes/og.ts': nitroContent
-  }
+  return [
+    {
+      tabName: 'app.vue',
+      filename: 'app.vue',
+      language: 'vue',
+      content: vueContent
+    },
+    {
+      tabName: 'server/routes/og.ts',
+      filename: 'server/routes/og.ts',
+      language: 'ts',
+      content: nitroContent
+    }
+  ]
 }
-export function generateLaravelTemplate(state: AppState): Record<string, string> {
+export function generateLaravelTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeStr(state.title)
   const eDesc = escapeStr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -325,12 +362,22 @@ Route::get('/api/og', function () {
     // )->header('Content-Type', 'image/png');
 });`
 
-  return {
-    'resources/views/components/meta-tags.blade.php': bladeContent,
-    'routes/web.php': webContent
-  }
+  return [
+    {
+      tabName: 'meta-tags.blade.php',
+      filename: 'resources/views/components/meta-tags.blade.php',
+      language: 'php',
+      content: bladeContent
+    },
+    {
+      tabName: 'web.php',
+      filename: 'routes/web.php',
+      language: 'php',
+      content: webContent
+    }
+  ]
 }
-export function generateHtmlTemplate(state: AppState): Record<string, string> {
+export function generateHtmlTemplate(state: AppState): TemplateFile[] {
   const eTitle = escapeHtmlAttr(state.title)
   const eDesc = escapeHtmlAttr(state.description)
   const eBrand = escapeHtmlAttr(state.brandName)
@@ -378,9 +425,14 @@ ${i18nTags}
   <meta property="twitter:image" content="${hostedUrl}" />
 </head>`
 
-  return {
-    'index.html': htmlContent
-  }
+  return [
+    {
+      tabName: 'index.html',
+      filename: 'index.html',
+      language: 'html',
+      content: htmlContent
+    }
+  ]
 }
 
 export function generateCode(state: AppState): TemplateFile[] {
