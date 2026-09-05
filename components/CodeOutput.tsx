@@ -10,7 +10,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 function EducationalGuide({ framework, activeFile }: { framework: Framework, activeFile: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  let title = "How to Implement";
+  const title = "How to Implement";
   let content = null;
 
   if (framework === 'nextjs') {
@@ -109,35 +109,22 @@ function EducationalGuide({ framework, activeFile }: { framework: Framework, act
 export function CodeOutput() {
   const store = useAppStore()
   const t = useTranslation(store.uiLanguage)
-  const filesResult = generateCode(store)
-  const files = typeof filesResult === 'string' ? { 'code.txt': filesResult } : filesResult
-  const fileKeys = Object.keys(files)
-
-  const [activeFile, setActiveFile] = useState(fileKeys[0] || '')
-
-  // Update active file if framework changes
-  useEffect(() => {
-    const f = generateCode(store);
-    const keys = Object.keys(typeof f === 'string' ? { 'code.txt': f } : f);
-    setActiveFile(keys[0] || '')
-  }, [store.framework, store.i18nEnabled])
-
-  // Ensure activeFile is valid
-  const currentFile = fileKeys.includes(activeFile) ? activeFile : (fileKeys[0] || '')
-  const currentCode = files[currentFile] || ''
-
-  const [html, setHtml] = useState('')
-  const [copied, setCopied] = useState(false)
-  const [copiedUrl, setCopiedUrl] = useState(false)
-  const [guideOpen, setGuideOpen] = useState(false)
+  const files = generateCode(store)
+  const [activeFileIndex, setActiveFileIndex] = useState(0)
 
   // Ensure active index is valid when framework changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveFileIndex(0)
-  }, [store.framework])
+  }, [store.framework, store.i18nEnabled])
 
-  const activeFile = files[activeFileIndex] || files[0]
+  const activeFileObj = files[activeFileIndex] || files[0]
+  const currentCode = activeFileObj ? activeFileObj.content : ''
+
+  const [html, setHtml] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
 
   useEffect(() => {
     async function highlight() {
@@ -146,12 +133,7 @@ export function CodeOutput() {
         return
       }
       try {
-        let lang = 'tsx'
-        if (currentFile.endsWith('.vue')) lang = 'vue'
-        else if (currentFile.endsWith('.html')) lang = 'html'
-        else if (currentFile.endsWith('.php')) lang = 'php'
-        else if (currentFile.endsWith('.js')) lang = 'javascript'
-        else if (currentFile.endsWith('.ts')) lang = 'ts'
+        const lang = activeFileObj ? activeFileObj.language : 'tsx'
 
         const result = await codeToHtml(currentCode, {
           lang,
@@ -164,7 +146,7 @@ export function CodeOutput() {
       }
     }
     highlight()
-  }, [currentCode, currentFile])
+  }, [currentCode, activeFileObj])
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(currentCode)
@@ -178,8 +160,7 @@ export function CodeOutput() {
     const a = document.createElement('a')
     a.href = url
 
-    // Extract filename from path
-    const fileName = currentFile.split('/').pop() || 'og-template.txt'
+    const fileName = activeFileObj ? activeFileObj.filename.split('/').pop() || 'og-template.txt' : 'og-template.txt'
 
     a.download = fileName
     document.body.appendChild(a)
@@ -208,9 +189,9 @@ export function CodeOutput() {
   }
 
   const getGuideContent = () => {
-    if (!activeFile) return null;
+    if (!activeFileObj) return null;
     const fw = store.framework;
-    const tabName = activeFile.tabName;
+    const tabName = activeFileObj.tabName;
 
     if (fw === 'nextjs') {
       if (tabName === 'opengraph-image.tsx') {
@@ -336,50 +317,31 @@ export function CodeOutput() {
           </div>
         </div>
 
-        {fileKeys.length > 1 && (
+        {files.length > 1 && (
           <div className="flex gap-2 border-b border-gray-800 pt-1">
-            {fileKeys.map((key) => (
+            {files.map((file, index) => (
               <button
-                key={key}
-                onClick={() => setActiveFile(key)}
+                key={index}
+                onClick={() => setActiveFileIndex(index)}
                 className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
-                  currentFile === key
+                  activeFileIndex === index
                     ? 'border-blue-500 text-blue-400'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}
               >
-                {key}
+                {file.tabName}
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* File Sub-tabs */}
-      {files.length > 1 && (
-        <div className="flex border-b border-gray-800 bg-[#0d1117] px-4 pt-2">
-          {files.map((file, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveFileIndex(index)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeFileIndex === index
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              {file.tabName}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Code Display */}
       <div className="flex-1 overflow-auto text-sm p-4 relative">
         <div dangerouslySetInnerHTML={{ __html: html }} className="[&>pre]:!bg-transparent [&>pre]:!p-0" />
       </div>
 
-      <EducationalGuide framework={store.framework} activeFile={currentFile} />
+      <EducationalGuide framework={store.framework} activeFile={activeFileObj ? activeFileObj.filename : ''} />
     </div>
   )
 }
