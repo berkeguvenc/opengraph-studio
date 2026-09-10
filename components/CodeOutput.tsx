@@ -153,15 +153,17 @@ export function CodeOutput() {
   const files: TemplateFile[] = generateCode(store)
   const [activeFileIndex, setActiveFileIndex] = useState(0)
 
-  // Reset active index when framework, i18n, or export mode changes (standard React pattern without effect)
+  // Reset active index when framework, i18n, export mode, or preset changes (standard React pattern without effect)
   const [prevFramework, setPrevFramework] = useState(store.framework)
   const [prevI18n, setPrevI18n] = useState(store.i18nEnabled)
   const [prevMode, setPrevMode] = useState(store.ogExportMode)
+  const [prevPreset, setPrevPreset] = useState(store.preset)
 
-  if (store.framework !== prevFramework || store.i18nEnabled !== prevI18n || store.ogExportMode !== prevMode) {
+  if (store.framework !== prevFramework || store.i18nEnabled !== prevI18n || store.ogExportMode !== prevMode || store.preset !== prevPreset) {
     setPrevFramework(store.framework)
     setPrevI18n(store.i18nEnabled)
     setPrevMode(store.ogExportMode)
+    setPrevPreset(store.preset)
     setActiveFileIndex(0)
   }
 

@@ -38,6 +38,207 @@ function buildSearchParams(state: AppState): string {
   }).toString()
 }
 
+function buildNextjsPresetJsx(state: AppState): string {
+  const eTitle = escapeStr(state.title)
+  const eDesc = escapeStr(state.description)
+  const eBrand = escapeStr(state.brandName)
+  const accent = state.accentColor
+
+  let background = "'white'"
+  if (state.bgStyle === 'solid') {
+    background = state.preset === 'minimalist' ? "'#ffffff'" : "'#0f172a'"
+  } else if (state.bgStyle === 'gradient') {
+    background = state.preset === 'minimalist'
+      ? "'linear-gradient(to bottom right, #ffffff, #f1f5f9, #ffffff)'"
+      : state.preset === 'saas'
+        ? `'radial-gradient(circle at top right, ${accent}40, #0f172a 50%)'`
+        : `'linear-gradient(to bottom right, #0f172a, ${accent}40, #0f172a)'`
+  } else if (state.bgStyle === 'pattern') {
+    background = state.preset === 'minimalist'
+      ? "'repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f8fafc 10px, #f8fafc 20px)'"
+      : "'repeating-linear-gradient(45deg, #0f172a, #0f172a 10px, #1e293b 10px, #1e293b 20px)'"
+  }
+
+  const textColor = state.preset === 'minimalist' ? '#0f172a' : 'white'
+  const descColor = state.preset === 'minimalist' ? '#64748b' : '#94a3b8'
+
+  if (state.preset === 'minimalist') {
+    return `  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          flexDirection: 'column',
+          padding: '60px',
+          backgroundColor: '#ffffff',
+          backgroundImage: ${background.includes('gradient') || background.includes('repeating') ? background : 'undefined'},
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            border: '1px solid #e2e8f0',
+            borderRadius: '24px',
+            flex: 1,
+            flexDirection: 'column',
+            padding: '60px',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'auto' }}>
+            ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
+            <img src="${state.logoUrl}" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '8px', marginRight: '16px' }} />` : ''}
+            <span style={{ fontSize: '24px', fontWeight: 700, color: '#334155' }}>
+              ${eBrand}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '72px', fontWeight: 700, color: '#0f172a', lineHeight: 1.1, marginBottom: '24px', letterSpacing: '-0.02em' }}>
+              ${eTitle}
+            </div>
+            <div style={{ fontSize: '32px', color: '#64748b', lineHeight: 1.5 }}>
+              ${eDesc}
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )`
+  }
+
+  if (state.preset === 'blog') {
+    return `  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          flexDirection: 'column',
+          padding: '80px',
+          backgroundColor: '#0f172a',
+          backgroundImage: ${background.includes('gradient') || background.includes('repeating') ? background : 'undefined'},
+        }}
+      >
+        ${state.tags.length > 0 ? `<div style={{ display: 'flex', gap: '16px', marginBottom: '40px' }}>
+          ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 24px', backgroundColor: '${accent}', color: 'white', fontSize: '20px', fontWeight: 700, borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>${tag}</div>`).join('\n          ')}
+        </div>` : ''}
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <div style={{ fontSize: '84px', fontWeight: 700, color: '${textColor}', lineHeight: 1.1, marginBottom: '32px' }}>
+            ${eTitle}
+          </div>
+          <div style={{ fontSize: '36px', color: '${descColor}', lineHeight: 1.5, borderLeft: '6px solid ${accent}', paddingLeft: '24px' }}>
+            ${eDesc}
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid ${descColor}40', paddingTop: '40px' }}>
+          ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
+          <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '24px' }} />` : ''}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '28px', fontWeight: 700, color: '${textColor}' }}>${eBrand}</span>
+            <span style={{ fontSize: '24px', color: '${descColor}' }}>5 min read</span>
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )`
+  }
+
+  if (state.preset === 'ecommerce') {
+    return `  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          backgroundColor: '#0f172a',
+          backgroundImage: ${background.includes('gradient') || background.includes('repeating') ? background : 'undefined'},
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', width: '60%', padding: '80px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
+            ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
+            <img src="${state.logoUrl}" alt="Logo" style={{ width: '56px', height: '56px', marginRight: '16px' }} />` : ''}
+            <span style={{ fontSize: '32px', fontWeight: 700, color: '${textColor}' }}>${eBrand}</span>
+          </div>
+          <div style={{ fontSize: '76px', fontWeight: 700, color: '${textColor}', lineHeight: 1.1, marginBottom: '24px' }}>
+            ${eTitle}
+          </div>
+          <div style={{ fontSize: '32px', color: '${descColor}', lineHeight: 1.4, marginBottom: '48px' }}>
+            ${eDesc}
+          </div>
+          <div style={{ display: 'flex', padding: '16px 48px', backgroundColor: '${accent}', color: 'white', fontSize: '32px', fontWeight: 700, borderRadius: '999px', width: 'fit-content' }}>
+            Shop Now
+          </div>
+        </div>
+        <div style={{ display: 'flex', width: '40%', backgroundColor: '${accent}20', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+          <div style={{ fontSize: '200px' }}>📦</div>
+          <div style={{ position: 'absolute', top: '80px', right: '80px', backgroundColor: '${accent}', color: 'white', padding: '16px 32px', borderRadius: '999px', fontSize: '36px', fontWeight: 700, transform: 'rotate(12deg)' }}>
+            NEW
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )`
+  }
+
+  // Modern SaaS (default)
+  return `  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          backgroundColor: '#0f172a',
+          backgroundImage: ${background.includes('gradient') || background.includes('repeating') ? background : 'undefined'},
+          padding: '80px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 'auto' }}>
+          ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
+          <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />` : ''}
+          <span style={{ fontSize: '32px', fontWeight: 700, color: '${textColor}', letterSpacing: '-0.02em' }}>
+            ${eBrand}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
+          ${state.tags.length > 0 ? `<div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${accent}30', color: '${accent}', fontSize: '20px', fontWeight: 700, letterSpacing: '-0.01em' }}>${tag}</div>`).join('\n            ')}
+          </div>` : ''}
+          <div style={{ fontSize: '80px', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '24px', color: '${textColor}', maxWidth: '1000px' }}>
+            ${eTitle}
+          </div>
+          <div style={{ fontSize: '36px', color: '${descColor}', letterSpacing: '-0.01em', lineHeight: 1.4, maxWidth: '900px' }}>
+            ${eDesc}
+          </div>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '16px', backgroundColor: '${accent}' }} />
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )`
+}
+
 export function generateNextjsTemplate(state: AppState): TemplateFile[] {
   const isI18n = state.i18nEnabled
   const isStatic = state.ogExportMode === 'static'
@@ -134,56 +335,7 @@ export const metadata: Metadata = {
   }
 
   // Dynamic mode: self-hosted Edge opengraph-image.tsx
-  let background = "'white'"
-  if (state.bgStyle === 'solid') background = "'#0f172a'"
-  else if (state.bgStyle === 'gradient') background = `'linear-gradient(to bottom right, #0f172a, ${state.accentColor}40, #0f172a)'`
-  else if (state.bgStyle === 'pattern') background = `'repeating-linear-gradient(45deg, #0f172a, #0f172a 10px, #1e293b 10px, #1e293b 20px)'`
-
-  const componentCode = `  return new ImageResponse(
-    (
-      <div
-        style={{
-          display: 'flex',
-          height: '100%',
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          backgroundImage: ${background.includes('gradient') ? background : 'undefined'},
-          backgroundColor: ${!background.includes('gradient') ? background : "'#0f172a'"},
-          padding: '80px',
-          color: 'white',
-          fontFamily: 'sans-serif',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 'auto' }}>
-          ${state.logoUrl ? `// eslint-disable-next-line @next/next/no-img-element
-          <img src="${state.logoUrl}" alt="Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', marginRight: '20px' }} />` : ''}
-          <span style={{ fontSize: '32px', fontWeight: 600, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
-            ${escapeStr(state.brandName)}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
-          ${state.tags.length > 0 ? `<div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-            ${state.tags.map(tag => `<div style={{ display: 'flex', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '${state.accentColor}30', color: '${state.accentColor}', fontSize: '20px', fontWeight: 600, letterSpacing: '-0.01em' }}>${tag}</div>`).join('\n            ')}
-          </div>` : ''}
-          <div style={{ fontSize: '80px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '24px', color: 'white', maxWidth: '1000px' }}>
-            ${escapeStr(state.title)}
-          </div>
-          <div style={{ fontSize: '36px', fontWeight: 400, color: '#94a3b8', letterSpacing: '-0.01em', lineHeight: 1.4, maxWidth: '900px' }}>
-            ${escapeStr(state.description)}
-          </div>
-        </div>
-
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '16px', backgroundColor: '${state.accentColor}' }} />
-      </div>
-    ),
-    {
-      ...size,
-    }
-  )
-}`
+  const componentCode = buildNextjsPresetJsx(state)
 
   const ogContent = `import { ImageResponse } from 'next/og'
 
