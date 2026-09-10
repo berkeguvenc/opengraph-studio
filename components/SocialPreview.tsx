@@ -66,10 +66,21 @@ export function SocialPreview() {
     ? `${store.brandName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
     : 'yourdomain.com'
 
+  const downloadImage = () => {
+    if (!imageUrl) return
+    const a = document.createElement('a')
+    a.href = imageUrl
+    a.download = 'og.png'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   return (
     <div className="flex flex-col h-full bg-slate-950/40">
-      {/* Platform Switcher */}
-      <div className="flex items-center gap-1.5 p-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur overflow-x-auto">
+      {/* Platform Switcher & Actions */}
+      <div className="flex items-center justify-between gap-3 p-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur overflow-x-auto">
+        <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={() => setPlatform('twitter')}
           className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
@@ -129,6 +140,19 @@ export function SocialPreview() {
           }`}
         >
           {t('instagramPreview')}
+        </button>
+        </div>
+
+        <button
+          onClick={downloadImage}
+          disabled={!imageUrl}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0 shadow-sm ml-auto cursor-pointer"
+          title={t('downloadImageDesc')}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>{t('downloadImage')}</span>
         </button>
       </div>
 

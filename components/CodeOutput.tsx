@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppStore, Framework } from '../lib/store'
+import { useAppStore, Framework, OgExportMode } from '../lib/store'
 import { generateCode, TemplateFile } from '../lib/templates'
 import { useState, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
@@ -23,10 +23,14 @@ function formatGuideText(text: string) {
 function EducationalGuide({
   framework,
   activeFile,
+  exportMode,
+  isI18n,
   t,
 }: {
   framework: Framework
   activeFile: string
+  exportMode: OgExportMode
+  isI18n: boolean
   t: (key: TranslationKey) => string
 }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -34,13 +38,26 @@ function EducationalGuide({
   const title = t('howToImplement')
   let content = null
 
-  if (framework === 'nextjs') {
+  if (exportMode === 'static') {
+    content = (
+      <div className="space-y-2">
+        <p><strong>{t('guidePlacement')}:</strong> {formatGuideText(t('guideStaticStep1'))}</p>
+        <p><strong>{t('guideInstructions')}:</strong> {formatGuideText(t('guideStaticStep2'))}</p>
+        {isI18n && (
+          <p className="pt-2 border-t border-gray-800/80"><strong>{t('guideI18nTitle')}:</strong> {formatGuideText(t('guideI18nExplanation'))}</p>
+        )}
+      </div>
+    )
+  } else if (framework === 'nextjs') {
     if (activeFile.includes('opengraph-image')) {
       content = (
         <div className="space-y-2">
           <p><strong>{t('guidePlacement')}:</strong> {formatGuideText(t('guideNextImagePlacement'))}</p>
           <p><strong>{t('guideEdgeRuntime')}:</strong> {formatGuideText(t('guideNextImageEdge'))}</p>
           <p><strong>{t('guideVerification')}:</strong> {formatGuideText(t('guideNextImageVerify'))}</p>
+          {isI18n && (
+            <p className="pt-2 border-t border-gray-800/80"><strong>{t('guideI18nTitle')}:</strong> {formatGuideText(t('guideI18nExplanation'))}</p>
+          )}
         </div>
       )
     } else {
@@ -48,6 +65,9 @@ function EducationalGuide({
         <div className="space-y-2">
           <p><strong>{t('guidePlacement')}:</strong> {formatGuideText(t('guideNextLayoutPlacement'))}</p>
           <p><strong>{t('guideVerification')}:</strong> {formatGuideText(t('guideNextLayoutVerify'))}</p>
+          {isI18n && (
+            <p className="pt-2 border-t border-gray-800/80"><strong>{t('guideI18nTitle')}:</strong> {formatGuideText(t('guideI18nExplanation'))}</p>
+          )}
         </div>
       )
     }
@@ -113,7 +133,7 @@ function EducationalGuide({
     <div className="border-t border-gray-800 bg-[#0a0d14]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 text-left text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800/50 transition-colors focus:outline-none"
+        className="w-full flex items-center justify-between p-4 text-left text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800/50 transition-colors focus:outline-none cursor-pointer"
       >
         <span>💡 {title}</span>
         <span className="text-gray-500">{isOpen ? '▼' : '▶'}</span>
@@ -133,13 +153,15 @@ export function CodeOutput() {
   const files: TemplateFile[] = generateCode(store)
   const [activeFileIndex, setActiveFileIndex] = useState(0)
 
-  // Reset active index when framework or i18n changes (standard React pattern without effect)
+  // Reset active index when framework, i18n, or export mode changes (standard React pattern without effect)
   const [prevFramework, setPrevFramework] = useState(store.framework)
   const [prevI18n, setPrevI18n] = useState(store.i18nEnabled)
+  const [prevMode, setPrevMode] = useState(store.ogExportMode)
 
-  if (store.framework !== prevFramework || store.i18nEnabled !== prevI18n) {
+  if (store.framework !== prevFramework || store.i18nEnabled !== prevI18n || store.ogExportMode !== prevMode) {
     setPrevFramework(store.framework)
     setPrevI18n(store.i18nEnabled)
+    setPrevMode(store.ogExportMode)
     setActiveFileIndex(0)
   }
 
@@ -152,7 +174,7 @@ export function CodeOutput() {
 
   const [html, setHtml] = useState('')
   const [copied, setCopied] = useState(false)
-  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [downloadingImage, setDownloadingImage] = useState(false)
 
   useEffect(() => {
     async function highlight() {
@@ -197,23 +219,40 @@ export function CodeOutput() {
     URL.revokeObjectURL(url)
   }
 
-  const copyUrl = async () => {
-    const searchParams = new URLSearchParams({
-      title: store.title,
-      description: store.description,
-      accentColor: store.accentColor,
-      bgStyle: store.bgStyle,
-      logoUrl: store.logoUrl,
-      brandName: store.brandName,
-      tags: store.tags.join(','),
-    }).toString()
-
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://yourdomain.com'
-    const url = `${baseUrl}/api/og?${searchParams}`
-
-    await navigator.clipboard.writeText(url)
-    setCopiedUrl(true)
-    setTimeout(() => setCopiedUrl(false), 2000)
+  const downloadOgImage = async () => {
+    try {
+      setDownloadingImage(true)
+      const res = await fetch('/api/og', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: store.title,
+          description: store.description,
+          accentColor: store.accentColor,
+          bgStyle: store.bgStyle,
+          logoUrl: store.logoUrl,
+          brandName: store.brandName,
+          tags: store.tags,
+          preset: store.preset,
+          bgImageBase64: store.bgImageBase64
+        })
+      })
+      if (res.ok) {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'og.png'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+    } catch (e) {
+      console.error('Failed to download OG image:', e)
+    } finally {
+      setDownloadingImage(false)
+    }
   }
 
   const handleFrameworkChange = (fw: Framework) => {
@@ -224,20 +263,21 @@ export function CodeOutput() {
   return (
     <div className="flex flex-col h-full bg-[#0d1117]">
       <div className="flex flex-col p-4 border-b border-gray-800 bg-[#0d1117] gap-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Framework Switcher */}
           <div className="flex gap-1 bg-gray-900 p-1 rounded-md">
             {[
+              { id: 'nextjs', label: 'Next.js' },
               { id: 'html', label: 'HTML' },
               { id: 'react', label: 'React SPA' },
-              { id: 'nextjs', label: 'Next.js' },
               { id: 'vue', label: 'Nuxt 3' },
               { id: 'laravel', label: 'Laravel' },
             ].map((fw) => (
               <button
                 key={fw.id}
                 onClick={() => handleFrameworkChange(fw.id as Framework)}
-                className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${store.framework === fw.id
-                    ? 'bg-gray-800 text-white'
+                className={`px-3 py-1.5 text-xs font-medium rounded transition-colors cursor-pointer ${store.framework === fw.id
+                    ? 'bg-gray-800 text-white shadow-sm'
                     : 'text-gray-400 hover:text-gray-200'
                   }`}
               >
@@ -245,35 +285,74 @@ export function CodeOutput() {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
+
+          {/* Mode Switcher & Action Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Mode Switcher */}
+            <div className="flex bg-gray-900 p-1 rounded-md border border-gray-800">
+              <button
+                onClick={() => store.setOgExportMode('static')}
+                className={`px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
+                  store.ogExportMode === 'static'
+                    ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+                title={t('guideStaticStep1')}
+              >
+                🖼️ {t('staticModeBadge')}
+              </button>
+              <button
+                onClick={() => store.setOgExportMode('dynamic')}
+                className={`px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
+                  store.ogExportMode === 'dynamic'
+                    ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+                title={t('guideEdgeRuntime')}
+              >
+                ⚡ {t('dynamicModeBadge')}
+              </button>
+            </div>
+
+            {/* Download Image Button */}
             <button
-              onClick={copyUrl}
-              className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+              onClick={downloadOgImage}
+              disabled={downloadingImage}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+              title={t('downloadImageDesc')}
             >
-              {copiedUrl ? t('copiedUrl') : t('copyHostedUrl')}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {downloadingImage ? '...' : t('downloadImage')}
             </button>
+
+            {/* Download Code File */}
             <button
               onClick={downloadFile}
-              className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors cursor-pointer"
             >
               {t('download')}
             </button>
+
+            {/* Copy Code */}
             <button
               onClick={copyCode}
-              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors cursor-pointer"
             >
               {copied ? t('copied') : t('copyCode')}
             </button>
           </div>
         </div>
 
+        {/* Tab selection for multi-file templates */}
         {files.length > 1 && (
           <div className="flex gap-2 border-b border-gray-800 pt-1">
             {files.map((file, index) => (
               <button
                 key={index}
                 onClick={() => setActiveFileIndex(index)}
-                className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${safeIndex === index
+                className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 cursor-pointer ${safeIndex === index
                     ? 'border-blue-500 text-blue-400'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                   }`}
@@ -290,8 +369,13 @@ export function CodeOutput() {
         <div dangerouslySetInnerHTML={{ __html: html }} className="[&>pre]:!bg-transparent [&>pre]:!p-0" />
       </div>
 
-      <EducationalGuide framework={store.framework} activeFile={activeFile.filename} t={t} />
+      <EducationalGuide
+        framework={store.framework}
+        activeFile={activeFile.filename}
+        exportMode={store.ogExportMode}
+        isI18n={store.i18nEnabled}
+        t={t}
+      />
     </div>
   )
 }
-
