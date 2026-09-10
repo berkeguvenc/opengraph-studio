@@ -15,13 +15,16 @@ export const appStateSchema = z.object({
   secondaryLocales: z.string(),
   uiLanguage: z.enum(['en', 'tr']),
   preset: z.enum(['minimalist', 'saas', 'blog', 'ecommerce']),
-  bgImageBase64: z.string()
+  bgImageBase64: z.string(),
+  ogExportMode: z.enum(['static', 'dynamic']),
+  siteUrl: z.string()
 })
 
 export type Framework = z.infer<typeof appStateSchema>['framework']
 export type BgStyle = z.infer<typeof appStateSchema>['bgStyle']
 export type UiLanguage = z.infer<typeof appStateSchema>['uiLanguage']
 export type Preset = z.infer<typeof appStateSchema>['preset']
+export type OgExportMode = z.infer<typeof appStateSchema>['ogExportMode']
 
 export interface AppState {
   title: string
@@ -38,6 +41,8 @@ export interface AppState {
   uiLanguage: UiLanguage
   preset: Preset
   bgImageBase64: string
+  ogExportMode: OgExportMode
+  siteUrl: string
 
   updateState: (updates: Partial<AppState>) => void
   setTitle: (title: string) => void
@@ -54,6 +59,8 @@ export interface AppState {
   setUiLanguage: (uiLanguage: UiLanguage) => void
   setPreset: (preset: Preset) => void
   setBgImageBase64: (bgImageBase64: string) => void
+  setOgExportMode: (ogExportMode: OgExportMode) => void
+  setSiteUrl: (siteUrl: string) => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -71,6 +78,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   uiLanguage: 'en',
   preset: 'saas',
   bgImageBase64: '',
+  ogExportMode: 'static',
+  siteUrl: 'https://yourdomain.com',
 
   updateState: (updates) => {
     // Only update fields that pass validation
@@ -105,4 +114,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUiLanguage: (uiLanguage) => get().updateState({ uiLanguage }),
   setPreset: (preset) => get().updateState({ preset }),
   setBgImageBase64: (bgImageBase64) => get().updateState({ bgImageBase64 }),
+  setOgExportMode: (ogExportMode) => get().updateState({ ogExportMode }),
+  setSiteUrl: (siteUrl) => get().updateState({ siteUrl }),
 }))

@@ -181,7 +181,53 @@ export function Sidebar() {
         <div className="space-y-4 pt-4 border-t border-slate-800">
           <h3 className="font-semibold text-slate-500 uppercase tracking-wider text-xs">{t('exportCode')}</h3>
 
-          <div className="space-y-3">
+          {/* Integration Mode Switcher */}
+          <div>
+            <label className={labelClass}>{t('exportMode')}</label>
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-lg">
+              <button
+                type="button"
+                onClick={() => store.setOgExportMode('static')}
+                className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  store.ogExportMode === 'static'
+                    ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🖼️ {t('exportModeStatic')}
+              </button>
+              <button
+                type="button"
+                onClick={() => store.setOgExportMode('dynamic')}
+                className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  store.ogExportMode === 'dynamic'
+                    ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                ⚡ {t('exportModeDynamic')}
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              {store.ogExportMode === 'static' ? t('guideStaticStep2') : t('guideEdgeRuntime')}
+            </p>
+          </div>
+
+          {/* Site Domain / URL */}
+          <div>
+            <label className={labelClass}>{t('siteUrlLabel')}</label>
+            <input
+              type="text"
+              value={store.siteUrl}
+              onChange={(e) => store.setSiteUrl(e.target.value)}
+              className={inputClass}
+              placeholder={t('siteUrlPlaceholder')}
+            />
+            <p className="text-[11px] text-slate-500 mt-1">{t('siteUrlHelp')}</p>
+          </div>
+
+          {/* i18n settings */}
+          <div className="space-y-3 pt-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -189,11 +235,14 @@ export function Sidebar() {
                 onChange={(e) => store.setI18nEnabled(e.target.checked)}
                 className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 h-4 w-4"
               />
-              <span className="text-slate-300">{t('enableI18n')}</span>
+              <span className="text-slate-300 font-medium">{t('enableI18n')}</span>
             </label>
 
             {store.i18nEnabled && (
               <div className="pl-6 space-y-3">
+                <p className="text-[11px] text-blue-400/90 bg-blue-950/40 p-2 rounded border border-blue-900/40 leading-relaxed">
+                  💡 {t('guideI18nExplanation')}
+                </p>
                 <div>
                   <label className="block text-slate-500 text-xs mb-1">{t('defaultLocale')}</label>
                   <input
@@ -201,6 +250,7 @@ export function Sidebar() {
                     value={store.defaultLocale}
                     onChange={(e) => store.setDefaultLocale(e.target.value)}
                     className={inputClass}
+                    placeholder="en or en_US"
                   />
                 </div>
                 <div>
@@ -210,6 +260,7 @@ export function Sidebar() {
                     value={store.secondaryLocales}
                     onChange={(e) => store.setSecondaryLocales(e.target.value)}
                     className={inputClass}
+                    placeholder="tr, es, de"
                   />
                 </div>
               </div>
