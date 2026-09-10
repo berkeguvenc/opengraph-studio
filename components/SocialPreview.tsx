@@ -10,6 +10,7 @@ export function SocialPreview() {
   const [platform, setPlatform] = useState<'twitter' | 'linkedin' | 'facebook' | 'discord' | 'whatsapp' | 'instagram'>('twitter')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [waTheme, setWaTheme] = useState<'dark' | 'light'>('dark')
+  const [igTheme, setIgTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
     let active = true
@@ -344,34 +345,61 @@ export function SocialPreview() {
             </div>
           )}
 
-          {/* Instagram DM Preview (Pixel-perfect based on reference) */}
+          {/* Instagram DM Preview (Modern & Pixel-perfect) */}
           {platform === 'instagram' && (
             <div className="w-full max-w-[440px] flex flex-col gap-3">
-              {/* Instagram Header Indicator */}
+              {/* Instagram Header Indicator & Theme Switcher */}
               <div className="flex items-center justify-between px-2 text-xs text-slate-400">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600"></span>
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600"></span>
                   Instagram Direct Message
                 </span>
-                <span className="text-[11px] text-slate-500">Sent link preview</span>
+                <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-md p-0.5">
+                  <button
+                    onClick={() => setIgTheme('dark')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
+                      igTheme === 'dark' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    Dark
+                  </button>
+                  <button
+                    onClick={() => setIgTheme('light')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
+                      igTheme === 'light' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    Light
+                  </button>
+                </div>
               </div>
 
-              {/* Chat Viewport with Dark Backdrop */}
-              <div className="relative p-4 sm:p-6 rounded-3xl bg-black border border-slate-800 shadow-2xl overflow-hidden">
+              {/* Chat Viewport */}
+              <div 
+                className={`relative p-4 sm:p-6 rounded-3xl border shadow-2xl overflow-hidden transition-colors ${
+                  igTheme === 'dark' 
+                    ? 'bg-[#121212] border-slate-800' 
+                    : 'bg-white border-gray-200'
+                }`}
+              >
                 {/* Subtle Instagram DM ambient background glow */}
-                <div className="absolute -right-16 -top-16 w-48 h-48 bg-purple-900/20 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-blue-900/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -right-16 -top-16 w-48 h-48 bg-purple-900/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-pink-900/10 rounded-full blur-3xl pointer-events-none" />
 
                 {/* Sent Message Row with Side Action Icons */}
                 <div className="flex items-center justify-end gap-2.5 sm:gap-3">
-                  {/* Left Action Buttons (Info & Send) */}
+                  {/* Left Action Buttons (Info & Share) */}
                   <div className="flex flex-col gap-2 shrink-0">
                     {/* Info Button */}
                     <button 
                       aria-label="Info" 
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white transition-all shadow-sm"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                        igTheme === 'dark' 
+                          ? 'bg-white/10 hover:bg-white/20 border border-white/15 text-white' 
+                          : 'bg-black/5 hover:bg-black/10 border border-black/10 text-gray-700'
+                      }`}
                     >
-                      <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="16" x2="12" y2="12" />
                         <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -381,9 +409,13 @@ export function SocialPreview() {
                     {/* Paper Airplane (DM Share) Button */}
                     <button 
                       aria-label="Share" 
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white transition-all shadow-sm"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                        igTheme === 'dark' 
+                          ? 'bg-white/10 hover:bg-white/20 border border-white/15 text-white' 
+                          : 'bg-black/5 hover:bg-black/10 border border-black/10 text-gray-700'
+                      }`}
                     >
-                      <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 -translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="w-4 h-4 -translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                         <line x1="22" y1="2" x2="11" y2="13" />
                         <polygon points="22 2 15 22 11 13 2 9 22 2" />
                       </svg>
@@ -391,66 +423,112 @@ export function SocialPreview() {
                   </div>
 
                   {/* Main Instagram Link Card Bubble */}
-                  <div className="w-full max-w-[320px] sm:max-w-[360px] rounded-[24px] overflow-hidden shadow-2xl transition-transform hover:scale-[1.01]">
-                    {/* Top Segment: White Interactive Card */}
-                    <div className="bg-white p-3 sm:p-4 flex items-center gap-3">
-                      {/* Left Thumbnail (Square format with rounded corners) */}
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-gray-100 flex items-center justify-center shadow-inner relative">
-                        {store.logoUrl ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img 
-                            src={store.logoUrl} 
-                            alt="Logo" 
-                            className="w-full h-full object-contain p-2" 
-                          />
-                        ) : imageUrl ? (
+                  <div className="relative w-full max-w-[320px] sm:max-w-[360px]">
+                    <div 
+                      className={`rounded-[22px] overflow-hidden shadow-lg border transition-all ${
+                        igTheme === 'dark' 
+                          ? 'bg-[#262626] border-[#363636] text-white' 
+                          : 'bg-[#f0f2f5] border-gray-200 text-gray-900'
+                      }`}
+                    >
+                      {/* 1. Full 1.91:1 Open Graph Image */}
+                      <div className="aspect-[1.91/1] w-full bg-slate-900/30 relative flex items-center justify-center overflow-hidden">
+                        {imageUrl ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img 
                             src={imageUrl} 
-                            alt="Preview" 
+                            alt="Instagram Preview" 
                             className="w-full h-full object-cover" 
                           />
                         ) : (
-                          <div className="w-full h-full bg-gray-200 animate-pulse" />
+                          <div className="w-full h-full bg-slate-800/40 animate-pulse" />
                         )}
                       </div>
 
-                      {/* Right Details */}
-                      <div className="flex-1 min-w-0 flex flex-col items-start">
-                        {/* Domain Pill Badge */}
-                        <div className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[10.5px] sm:text-[11px] font-medium truncate max-w-full">
-                          {displayDomain}
+                      {/* 2. Link Preview Details */}
+                      <div className="p-3 sm:p-3.5 flex flex-col gap-1">
+                        {/* Domain / Brand Header */}
+                        <div className="flex items-center gap-1.5">
+                          {store.logoUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img 
+                              src={store.logoUrl} 
+                              alt="Logo" 
+                              className="w-3.5 h-3.5 rounded-full object-contain shrink-0" 
+                            />
+                          ) : (
+                            <svg className="w-3.5 h-3.5 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="2" y1="12" x2="22" y2="12" />
+                              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                            </svg>
+                          )}
+                          <span 
+                            className={`text-[11px] font-medium tracking-wide uppercase truncate ${
+                              igTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                            }`}
+                          >
+                            {displayDomain}
+                          </span>
                         </div>
 
-                        {/* Card Title */}
-                        <div className="font-bold text-gray-900 text-xs sm:text-[14px] leading-tight line-clamp-2 mt-1.5 w-full">
+                        {/* Title */}
+                        <div 
+                          className={`font-semibold text-xs sm:text-[14px] leading-snug line-clamp-2 mt-0.5 ${
+                            igTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}
+                        >
                           {store.title}
                         </div>
 
-                        {/* CTA Button */}
-                        <button className="mt-2 px-3 py-1 bg-[#131720] hover:bg-black text-white text-[11px] sm:text-xs font-semibold rounded-full inline-flex items-center gap-1 shadow-sm transition-colors">
-                          <span>{t('instagramCta')}</span>
-                        </button>
+                        {/* Description */}
+                        {store.description && (
+                          <div 
+                            className={`text-[12px] leading-snug line-clamp-2 mt-0.5 ${
+                              igTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                            }`}
+                          >
+                            {store.description}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 3. Sent Link URL Footer */}
+                      <div 
+                        className={`px-3.5 py-2 border-t flex items-center justify-between gap-2 ${
+                          igTheme === 'dark' ? 'border-white/10 bg-[#1f1f1f]' : 'border-black/5 bg-[#e8ebed]'
+                        }`}
+                      >
+                        <a 
+                          href={`https://${displayDomain}`} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className={`text-xs hover:underline truncate ${
+                            igTheme === 'dark' ? 'text-[#3897f0]' : 'text-[#00376b]'
+                          }`}
+                        >
+                          https://{displayDomain}
+                        </a>
+                        <span 
+                          className={`text-[10.5px] shrink-0 font-normal ${
+                            igTheme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                          }`}
+                        >
+                          14:32
+                        </span>
                       </div>
                     </div>
 
-                    {/* Bottom Segment: Dark Blue Message Bubble Base */}
-                    <div className="bg-[#1c4d68] px-4 py-3 sm:py-3.5 text-white flex flex-col justify-center">
-                      {/* Main Message Title */}
-                      <div className="font-semibold text-xs sm:text-[14.5px] leading-snug line-clamp-2 text-white">
-                        {store.title}
-                      </div>
-
-                      {/* Domain with Globe Icon */}
-                      <div className="flex items-center gap-1.5 text-xs text-[#8cb4cb] mt-2 font-normal truncate">
-                        {/* Globe Icon */}
-                        <svg className="w-4 h-4 shrink-0 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="2" y1="12" x2="22" y2="12" />
-                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                        </svg>
-                        <span className="truncate">{displayDomain}</span>
-                      </div>
+                    {/* Instagram Double-tap Heart Reaction Badge */}
+                    <div 
+                      className={`absolute -bottom-2 -right-1.5 px-1.5 py-0.5 rounded-full border shadow-md flex items-center gap-1 text-[11px] font-medium ${
+                        igTheme === 'dark' 
+                          ? 'bg-[#262626] border-[#363636] text-white' 
+                          : 'bg-white border-gray-200 text-gray-800'
+                      }`}
+                    >
+                      <span>❤️</span>
+                      <span className="text-[10px]">1</span>
                     </div>
                   </div>
                 </div>
