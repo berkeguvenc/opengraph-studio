@@ -178,6 +178,8 @@ export function CodeOutput() {
   const [copied, setCopied] = useState(false)
   const [downloadingImage, setDownloadingImage] = useState(false)
 
+  const activeFileLanguage = activeFile ? activeFile.language : 'tsx'
+
   useEffect(() => {
     async function highlight() {
       if (!currentCode) {
@@ -185,10 +187,8 @@ export function CodeOutput() {
         return
       }
       try {
-        const lang = activeFile ? activeFile.language : 'tsx'
-
         const result = await codeToHtml(currentCode, {
-          lang,
+          lang: activeFileLanguage,
           theme: 'github-dark'
         })
         setHtml(result)
@@ -198,7 +198,7 @@ export function CodeOutput() {
       }
     }
     highlight()
-  }, [currentCode, activeFile])
+  }, [currentCode, activeFileLanguage])
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(currentCode)
